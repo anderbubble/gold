@@ -1,0 +1,164 @@
+  <chapter id="ChargeRates">
+    <title>Managing Charge Rates</title>
+    <para>
+Charge Rates establish how much it costs to use your resources. There are two main categories of charge rates, consumable resources and quality-based charge rates. Resource charge rates define how much it costs per unit of time to use a consumable resource like processors, memory, telescope time, etc. Quality-based charge rates apply a multiplicative charge factor related to the quality or class of service obtained such as QOS, nodetype, backlog, primetime, etc.
+    </para>
+    <para>
+By default, charges are calculated according to the following formula:
+
+For each consumable resource used, a resource charge is calculated by multiplying the amount of the resource used by the amount of time it was used, multiplied by the charge rate for that resource. These resource charges are added together. Then, for each quality-based charge rate, a charge factor is looked-up based on the type and name of the charge rate. The sum of the resource charges is multiplied by each of the applicable charge factors.
+    </para>
+
+    <sect1 id="ChargeRateCreate">
+      <title>Creating ChargeRates</title>
+      <para>
+To create a new charge rate, use the command <command>goldsh ChargeRate Create</command>:
+      </para>
+      <cmdsynopsis>
+        <command>goldsh ChargeRate Create</command>
+        <arg choice="plain">Type=<replaceable>&lt;Charge Rate Type&gt;</replaceable></arg>
+        <arg choice="plain">Name=<replaceable>&lt;Charge Rate Name&gt;</replaceable></arg>
+        <arg choice="plain">Rate=<replaceable>&lt;Floating Point Multiplier&gt;</replaceable></arg>
+        <arg>Description=<replaceable>&lt;Description&gt;</replaceable></arg>
+        <arg>ShowUsage:=True</arg>
+      </cmdsynopsis>
+      <example>
+        <title>Creating a resource charge rate</title>
+        <para>
+          <userinput><prompt>$ </prompt>
+goldsh ChargeRate Create Type=Resource Name=Processors Rate=1
+          </userinput>
+        </para>
+        <screen>
+Successfully created 1 ChargeRate
+        </screen>
+      </example>
+      <example>
+        <title>Creating another resource charge rate</title>
+        <para>
+          <userinput><prompt>$ </prompt>
+goldsh ChargeRate Create Type=Resource Name=Memory Rate=0.001
+          </userinput>
+        </para>
+        <screen>
+Successfully created 1 ChargeRate
+        </screen>
+      </example>
+      <example>
+        <title>Creating a quality-based charge rate</title>
+        <para>
+          <userinput><prompt>$ </prompt>
+goldsh ChargeRate Create Type=QualityOfService Name=BottomFeeder Rate=0.5
+          </userinput>
+        </para>
+        <screen>
+Successfully created 1 ChargeRate
+        </screen>
+      </example>
+      <example>
+        <title>Creating another quality-based charge rate</title>
+        <para>
+          <userinput><prompt>$ </prompt>
+goldsh ChargeRate Create Type=QualityOfService Name=Premium Rate=2
+          </userinput>
+        </para>
+        <screen>
+Successfully created 1 ChargeRate
+        </screen>
+      </example>
+    </sect1>
+
+    <sect1 id="ChargeRateQuery">
+      <title>Querying ChargeRates</title>
+      <para>
+To display charge rate information, use the command <command>goldsh ChargeRate Query</command>:
+      </para>
+      <cmdsynopsis>
+        <command>goldsh ChargeRate Query</command>
+        <arg>Show:=<replaceable>&lt;"Field1,Field2,..."&gt;</replaceable></arg>
+        <arg>Type==<replaceable>&lt;Charge Rate Type&gt;</replaceable></arg>
+        <arg>Name==<replaceable>&lt;Charge Rate Name&gt;</replaceable></arg>
+        <arg>Rate==<replaceable>&lt;Floating Point Multiplier&gt;</replaceable></arg>
+        <arg>Description==<replaceable>&lt;Description&gt;</replaceable></arg>
+        <arg>ShowUsage:=True</arg>
+      </cmdsynopsis>
+      <example>
+        <title>Listing all charge rates</title>
+        <para>
+          <userinput><prompt>$ </prompt>
+goldsh ChargeRate Query
+          </userinput>
+        </para>
+        <screen>
+Type             Name         Rate  Description 
+------------------------ ------------------ ------- ---------------- 
+Resource         Processors   1                 
+QualityOfService BottomFeeder 0.5               
+QualityOfService Normal       1                 
+QualityOfService Premium      2                 
+Resource         Memory       0.001             
+        </screen>
+      </example>
+    </sect1>
+
+    <sect1 id="ChargeRateModify">
+      <title>Modifying Charge Rates</title>
+      <para>
+To modify a charge rate, use the command <command>goldsh ChargeRate Modify</command>:
+      </para>
+      <cmdsynopsis>
+        <command>goldsh ChargeRate Modify</command>
+        <arg>Rate=<replaceable>&lt;Floating Point Multiplier&gt;</replaceable></arg>
+        <arg>Description=<replaceable>&lt;Description&gt;</replaceable></arg>
+        <arg>Type==<replaceable>&lt;Charge Rate Type&gt;</replaceable></arg>
+        <arg>Name==<replaceable>&lt;Charge Rate Name&gt;</replaceable></arg>
+        <arg>Rate==<replaceable>&lt;Floating Point Multiplier&gt;</replaceable></arg>
+        <arg>ShowUsage:=True</arg>
+      </cmdsynopsis>
+      <caution> 
+        <para>
+The goldsh control program allows you to make powerful and sweeping modifications to gold objects. Misuse of this command could result in the inadvertent modification of all charge rates.
+        </para>
+      </caution>
+      <example>
+        <title>Changing a charge rate</title>
+        <para>
+          <userinput><prompt>$ </prompt>
+goldsh ChargeRate Modify Type==Resource Name==Memory Rate=0.05
+          </userinput>
+        </para>
+        <screen>
+Successfully modified 1 ChargeRate
+        </screen>
+      </example>
+    </sect1>
+
+    <sect1 id="ChargeRateDelete">
+      <title>Deleting Charge Rates</title>
+      <para>
+To delete a charge rate, use the command <command>goldsh ChargeRate Delete</command>:
+      </para>
+      <cmdsynopsis>
+        <command>goldsh ChargeRate Delete</command>
+        <arg>Name==<replaceable>&lt;Charge Rate Name&gt;</replaceable></arg>
+        <arg>Rate==<replaceable>&lt;Floating Point Multiplier&gt;</replaceable></arg>
+      </cmdsynopsis>
+      <caution> 
+        <para>
+The goldsh control program allows you to make powerful and sweeping modifications to gold objects. Misuse of this command could result in the inadvertent deletion of all charge rates.
+        </para>
+      </caution>
+      <example>
+        <title>Deleting a charge rate</title>
+        <para>
+          <userinput><prompt>$ </prompt>
+goldsh ChargeRate Delete Type==Resource Name==Memory
+          </userinput>
+        </para>
+        <screen>
+Successfully deleted 1 ChargeRate
+        </screen>
+      </example>
+    </sect1>
+
+  </chapter>

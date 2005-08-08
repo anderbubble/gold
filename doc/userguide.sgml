@@ -1,0 +1,90 @@
+<!--
+      This is the Gold User's Guide by Scott Jackson.
+      See userguide.txt or userguide.pdf for formatted output.
+-->
+
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+<!ENTITY copyright SYSTEM "copyright.sgml">
+<!ENTITY legalnotice SYSTEM "legalnotice.sgml">
+<!ENTITY overview SYSTEM "overview.sgml">
+<!ENTITY installation SYSTEM "installation.sgml">
+<!ENTITY gettingstarted SYSTEM "gettingstarted.sgml">
+<!ENTITY gettingadvanced SYSTEM "gettingadvanced.sgml">
+<!ENTITY users SYSTEM "users.sgml">
+<!ENTITY machines SYSTEM "machines.sgml">
+<!ENTITY projects SYSTEM "projects.sgml">
+<!ENTITY accounts SYSTEM "accounts.sgml">
+<!ENTITY allocations SYSTEM "allocations.sgml">
+<!ENTITY reservations SYSTEM "reservations.sgml">
+<!ENTITY quotations SYSTEM "quotations.sgml">
+<!ENTITY chargerates SYSTEM "chargerates.sgml">
+<!ENTITY jobs SYSTEM "jobs.sgml">
+<!ENTITY transactions SYSTEM "transactions.sgml">
+<!ENTITY roles SYSTEM "roles.sgml">
+<!ENTITY passwords SYSTEM "passwords.sgml">
+<!ENTITY goldsh SYSTEM "goldsh.sgml">
+<!ENTITY customize SYSTEM "customize.sgml">
+<!ENTITY integration SYSTEM "integration.sgml">
+<!ENTITY configuration SYSTEM "configuration.sgml">
+]>
+
+<book>
+
+<!-- Metadata -->
+
+  <bookinfo>
+    <date>2005-06-29</date>
+    <title><productname>Gold</productname> User's Guide</title>
+    <author>
+      <firstname>Scott</firstname>
+      <surname>Jackson</surname>
+      <affiliation><orgname>Pacific Northwest National Laboratory</orgname></affiliation>
+    </author>
+    <address><email>Scott.Jackson@pnl.gov</email></address>
+    <releaseinfo>2.0.0.0</releaseinfo>
+    &copyright;
+    &legalnotice;
+  </bookinfo>
+
+<!-- Table of contents -->
+
+  <toc></toc>
+
+<!-- Preface -->
+
+  <preface>
+    <title>Notice</title>
+    <important>
+      <para>
+This is the general release of the User's Guide. Other information may be found by browsing the FAQ (&lt;http://sss.scl.ameslab.gov/cgi-bin/faq?file=3&amp;keywords=file&gt;) posting to the gold users list (&lt;gold-users@lyris.pnl.gov&gt;) submitting bug reports or change requests (&lt;gold-support@sss.scl.ameslab.gov&gt;) or contacting the author (&lt;Scott.Jackson@pnl.gov&gt;).
+      </para>
+    </important>
+  </preface>
+
+<!-- Chapters -->
+
+  &overview;
+  &installation;
+  &gettingstarted;
+  &gettingadvanced;
+  &users;
+  &machines;
+  &projects;
+  &accounts;
+  &allocations;
+  &reservations;
+  &quotations;
+  &jobs;
+  &chargerates;
+  &transactions;
+  &roles;
+  &passwords;
+  &goldsh;
+  &customize;
+  &integration;
+  &configuration;
+
+<!-- End of Book -->
+
+</book>
+

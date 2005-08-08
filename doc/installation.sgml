@@ -1,0 +1,762 @@
+  <chapter id="Installation">
+    <title>Installation</title>
+    <para>
+Gold uses the standard configure, make and make install steps that we all know and love. However, there are a number of preparation, prerequisite, setup and customization steps that need to be performed. This document provides general installation guidance and provides a number of sample steps referenced to a particular installation on a Linux platform using the bash shell. These steps indicate the userid in brackets performing the step. The exact commands to be performed and the user that issues them will vary based on the platform, shell, installation preferences, etc.
+    </para>
+
+    <sect1 id="Preparation">
+      <title>Preparation</title>
+      <para>
+To build and install Gold, you first need to unpack the archive and change directory into the top directory of the distribution.  For security reasons, it is recommended that you install and run Gold under its own non-root userid.
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+useradd gold
+        </userinput>
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+passwd gold
+        </userinput>
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+mkdir ~/src
+        </userinput>
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+cd ~/src
+        </userinput>
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+gzip -cd gold-2.0.0.0.tar.gz | tar xvf -
+        </userinput>
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+cd gold-2.0.0.0
+        </userinput>
+      </para>
+    </sect1>
+
+    <sect1 id="Prerequisites">
+      <title>Install Prerequisites</title>
+      <para>
+You will first need to build, test and install the following prerequisites:
+      </para>
+
+      <sect2>
+        <title>Perl 5.6.1 or higher (with suidperl) [REQUIRED]</title>
+        <para>
+The gold server and clients are written in Perl. Perl 5.6.1 or higher is required. The perl installation must include suidperl for proper client authentication. Use 'perl -v' to see what level of Perl is installed and 'suidperl -v' to see if suidperl is installed.
+Perl is available at: &lt;http://www.perl.com/&gt;
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+cd /usr/local/src
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+wget http://www.cpan.org/src/stable.tar.gz
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+gzip -cd stable.tar.gz | tar xvf -
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+cd perl-5.8.5
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+sh Configure -Dd_dosuid -de
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+make
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+make test
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+make install
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+(cd /usr/include &amp;&amp; /usr/local/bin/h2ph *.h sys/*.h)
+          </userinput>
+        </para>
+        <para>
+Or if you are using rpms, you will need the perl and the perl-suidperl rpms appropriate for your architecture and operating system:
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+wget ftp://rpmfind.speakeasy.net/linux/redhat/updates/9/en/os/i386/perl-5.8.0-88.3.i386.rpm
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+wget ftp://rpmfind.speakeasy.net/linux/redhat/updates/9/en/os/i386/perl-suidperl-5.8.0-88.3.i386.rpm
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+rpm -Uvh perl-5.8.0-88.3.i386.rpm perl-suidperl-5.8.0-88.3.i386.rpm
+          </userinput>
+        </para>
+      </sect2>
+
+      <sect2>
+        <title>libxml2 2.4.25 or higher [REQUIRED]</title>
+        <para>
+LibXML2 is needed by the XML::LibXML perl module to communicate via the SSSRMAP message format.
+LibXML2 is available at: &lt;http://www.xmlsoft.org/&gt;
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+cd /usr/local/src
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+wget &mdash;passive-ftp ftp://xmlsoft.org/libxml2-2.6.17.tar.gz
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+gzip -cd libxml2-2.6.17.tar.gz | tar xvf -
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+cd libxml2-2.6.17
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+./configure
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+make
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+make install
+          </userinput>
+        </para>
+      </sect2>
+
+      <sect2>
+        <title>PostgreSQL database 7.2 or higher [REQUIRED]</title>
+        <para>
+Gold makes use of a database for transactions and data persistence. Two databases have been tested for use with Gold thus far: PostgreSQL and SQLite. Postgres is an external database that must be separately installed configured and started, while SQLite is an embedded database bundled with the Gold source code. If you intend to use the PostgreSQL database, you will need to install it.
+PostgreSQL is available at: &lt;http://www.postgresql.org/&gt;
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+cd /usr/local/src
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+wget ftp://ftp3.us.postgresql.org/pub/postgresql/source/v7.4.5/postgresql-7.4.5.tar.gz
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+gzip -cd postgresql-7.4.5.tar.gz | tar xvf -
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+cd postgresql-7.4.5
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+./configure
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+make
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+make install
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+adduser postgres
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+mkdir /usr/local/pgsql/data
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+chown postgres /usr/local/pgsql/data
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+touch /var/log/pgsql
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+chown postgres /var/log/pgsql
+          </userinput>
+        </para>
+        <para>
+Or if you are using rpms, you will need the postgresql, postgresql-libs, postgresql-server, and postgresql-devel rpms appropriate for your architecture and operating system:
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+wget ftp://rpmfind.speakeasy.net/linux/redhat/updates/9/en/os/i386/postgresql-7.3.2-3.i386.rpm
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+wget ftp://rpmfind.speakeasy.net/linux/redhat/updates/9/en/os/i386/postgresql-libs-7.3.2-3.i386.rpm
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+wget ftp://rpmfind.speakeasy.net/linux/redhat/updates/9/en/os/i386/postgresql-server-7.3.2-3.i386.rpm
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+wget ftp://rpmfind.speakeasy.net/linux/redhat/updates/9/en/os/i386/postgresql-devel-7.3.2-3.i386.rpm
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+rpm -Uvh postgresql-7.3.2-3.i386.rpm postgresql-libs-7.3.2-3.i386.rpm postgresql-server-7.3.2-3.i386.rpm postgresql-devel-7.3.2-3.i386.rpm
+          </userinput>
+        </para>
+      </sect2>
+
+      <sect2>
+        <title>Gnu readline 2.0 or higher [OPTIONAL]</title>
+        <para>
+The interactive control program (goldsh) can support command-line-editing capabilities if readline support is enabled. Most recent linux distributions come with the appropriate readline support.
+Gnu readline is available at: &lt;http://www.gnu.org/&gt;
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+cd /usr/local/src
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+wget http://ftp.gnu.org/gnu/readline/readline-5.0.tar.gz
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+gzip -cd readline-5.0.tar.gz | tar xvf -
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+cd readline-5.0
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+./configure
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+make
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+make install
+          </userinput>
+        </para>
+      </sect2>
+
+      <sect2>
+        <title>Java 2 SDK 1.4 or higher [OPTIONAL]</title>
+        <para>
+Gold provides a web based gui so that managers, users and administrators can interact with the accounting and allocation system. This alpha gui is still under active development and has not been widely tested, however, it is made available at this stage in the hopes that it may be useful to you as is, and so that we can receive feedback, improvements, etc. The web interface utilizes Java Server Pages and needs to have a servlet container installed. A low-level java client also exists but most clients are written in Perl.
+Java 2 SDK is available at: &lt;http://java.sun.com/j2se&gt;
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+cd /usr/local/src
+          </userinput>
+        </para>
+        <para>
+Download j2sdk-1_4_2_01-linux-i586.bin ( or j2sdk-1_4_2_01-linux-i586-rpm.bin ) from http://java.sun.com/j2se/1.4/download.html
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+chmod +x j2sdk-1_4_2_01-linux-i586.bin
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+cd /usr/local
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+src/j2sdk-1_4_2_01-linux-i586.bin
+          </userinput>
+        </para>
+      </sect2>
+
+      <sect2>
+        <title>Apache Tomcat Server 4 or higher [OPTIONAL]</title>
+        <para>
+Gold provides a web based gui so that managers, users and administrators can interact with the accounting and allocation system. The web interface utilizes Java Server Pages and needs to have a servlet container installed.
+Tomcat is available at: &lt;http://jakarta.apache.org/tomcat/&gt;
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+cd /usr/local/src
+          </userinput>
+        </para>
+        <para>
+wget ftp://ftp.tux.org/pub/net/apache/dist/jakarta/tomcat-4/v4.1.29/bin/jakarta-tomcat-4.1.29.tar.gz
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+cd /usr/local
+          </userinput>
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+gzip -cd src/jakarta-tomcat-4.1.29.tar.gz | tar xvf -
+          </userinput>
+        </para>
+      </sect2>
+    </sect1>
+
+    <sect1 id="Configure">
+      <title>Configuration</title>
+      <para>
+To configure Gold, run the "configure" script provided with the distribution.
+      </para>
+
+      <literallayout>
+To see the list of options:
+    
+  -h, &mdash;help              display the list of options
+
+Use prefix to tell it where Gold should be installed (defaults to /usr/local):
+
+  &mdash;prefix=PREFIX         install architecture-independent files in PREFIX
+
+Use with-db to specify the database you intend to use with Gold. Currently only PostgreSQL (Pg) and SQLite have been tested for use with Gold. Postgres is an external database which runs in a distinct (possibly remote) process and communicates over sockets while SQLite is an embedded database bundled with Gold with SQL queries being performed within the goldd process itself through library calls. Initial testing has shown SQLite to be at least as fast as PostgreSQL for small installations. The default is to use PostgreSQL.
+
+  &mdash;with-db=DATABASE      database to be used { Pg, SQLite } [Pg]
+
+Use without-readline if you do not want to use the gnu readline library
+
+  &mdash;without-readline      Don't use readline in interactive control program
+
+Use with-user to specify the userid that gold will run under (defaults to the
+user running the configure command).
+
+  &mdash;with-user=USER        user id under which the gold server will run
+
+Use with-log-dir to specify the directory to which logs will be written
+(defaults to PREFIX/log).
+
+  &mdash;with-log-dir=PATH     directory for log files [PREFIX/log]
+
+Use with-perl-libs to indicate whether you want to install the required perl modules in a local gold directory (PREFIX/lib) or in the default system site-perl directory (triggered by running make deps).
+
+  &mdash;with-perl-libs=local|site       install policy for prerequisite perl libs [local]
+
+Use with-gold-libs to indicate whether you want to install the Gold modules in a local gold directory (PREFIX/lib) or in the default system site-perl directory (defaults to local).
+
+  &mdash;with-gold-libs=local|site  install policy for Gold perl libs [local]
+
+The PERL environment variable helps the install process find the desired (5.6) perl interpreter if it is not in your path or not found first in a path search.
+
+  PERL        full pathname of the Perl interpreter
+
+The JAVA_HOME environment variable helps the install process locate the java, javac and jar executables. JAVA_HOME can be calculated by configure if the desired java executable is found in a path search.
+
+  JAVA_HOME   Java 2 SDK home directory (contains bin, lib, jre, ...)
+
+The CATALINA_HOME environment variable helps the install process locate the Tomcat home directory. This variable must be set if you want to use the web GUI.
+
+  CATALINA_HOME
+              Tomcat home directory (contains common, conf, logs, webapps
+              ...)
+
+Some other influential environment variables are:
+  CC          C compiler command
+  CFLAGS      C compiler flags
+  LDFLAGS     linker flags, e.g. -L&lt;lib dir&gt; if you have libraries in a
+              nonstandard directory &lt;lib dir&gt;
+  CPPFLAGS    C/C++ preprocessor flags, e.g. -I&lt;include dir&gt; if you have
+              headers in a nonstandard directory &lt;include dir&gt;
+      </literallayout>
+      <para>
+So, as an example you might use something like:
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+cd gold-2.0.0.0
+        </userinput>
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+./configure &mdash;prefix=/usr/local/gold CATALINA_HOME=/usr/local/jakarta-tomcat-4.1.29
+        </userinput>
+      </para>
+    </sect1>
+
+    <sect1 id="Compilation">
+      <title>Compilation</title>
+      <para>
+To compile the program, type make:
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+make
+        </userinput>
+      </para>
+      <para>
+If you would like to try out the alpha web-gui, type make gui:
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+make gui
+        </userinput>
+      </para>
+    </sect1>
+
+    <sect1 id="Dependencies">
+      <title>Perl Module Dependencies</title>
+      <para>
+Gold requires the use of a number of Perl modules. These modules are included
+in tarball form in the Gold distribution and they can be installed by typing
+'make deps':
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+make deps
+        </userinput>
+      </para>
+      <para>
+This will install the following Perl modules as necessary. By default, these will be installed under gold's lib/perl5 directory. To install these in the system site-perl directory, use the configure parameter with-perl-libs as described in the configuration section.
+      </para>
+      <literallayout>
+    Compress::Zlib
+    Crypt::CBC
+    Crypt::DES
+    Crypt::DES_EDE3
+    Data::Properties
+    Date::Manip
+    DBI
+    DBD::Pg or DBD::SQLite
+    Digest
+    Digest::HMAC
+    Digest::MD5
+    Digest::SHA1
+    Error
+    Log::Dispatch
+    Log::Dispatch::FileRotate
+    Log::Log4perl
+    MIME::Base64
+    Module::Build
+    Params::Validate
+    Term::ReadLine::Gnu
+    Time::HiRes
+    XML::SAX
+    XML::LibXML::Common
+    XML::LibXML
+    XML::NamespaceSupport
+      </literallayout>
+      <para>
+If you would prefer to do so, you could install these modules via other sources, such as from rpm, or from CPAN using 'perl -MCPAN -e shell'.
+      </para>
+    </sect1>
+
+    <sect1 id="Install">
+      <title>Installation</title>
+      <para>
+Use `make install' to install Gold. You may need to do this as root if any of the installation or log directories do not already have write permission as the gold admin user.
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+make install
+        </userinput>
+      </para>
+      <para>
+If you would like to try out the alpha web-gui, type make install-gui.
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+make install-gui
+        </userinput>
+      </para>
+      <para>
+The standard installation process will copy the binaries and perl scripts to /usr/local/bin, install the server in /usr/local/sbin, put the libs in /usr/local/lib, the config files in /usr/local/etc and the man pages in /usr/local/man. You can customize the directories either through the configuration process or by making the necessary changes in the Makefile.
+      </para>
+      <para>
+To delete the files created by the Gold installation, you can use 'make uninstall'.
+      </para>
+      <para>
+You will also need to generate a secret key which enables secure communication
+between clients and server. This key is a pass-phrase consisting of up to 80
+characters and can include spaces and the regular visible ASCII characters.
+Note that if you are using Gold with the Maui Scheduler, they will need both
+need to use a shared secret key.
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+make auth_key
+        </userinput>
+      </para>
+      <screen>
+Enter your secret key (up to 80 characters and can include spaces): sss
+      </screen>
+    </sect1>
+
+    <sect1 id="GeneralSetup">
+      <title>General Setup</title>
+      <para>
+Edit the Gold configuration files.
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+vi /usr/local/gold/etc/goldd.conf
+        </userinput>
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+vi /usr/local/gold/etc/gold.conf
+        </userinput>
+      </para>
+    </sect1>
+
+    <sect1 id="DatabaseSetup">
+      <title>Database Setup</title>
+      <para>
+If you have chosen to use PostgreSQL, you will need to configure the database to support Gold connections and schema. No setup is needed if you are using SQLite.
+      </para>
+      <para>
+Initialize the database (if you installed from tarball).
+      </para>
+      <para>
+        <userinput><prompt>[postgres]$ </prompt>
+/usr/local/pgsql/bin/initdb -D /usr/local/pgsql/data
+        </userinput>
+      </para>
+      <para>
+Add the IP ADDRESS of the host where the Gold server will run (even if it is the same host as the database server).
+      </para>
+      <para>
+        <userinput><prompt>[postgres]$ </prompt>
+echo "host    all         all         192.168.1.1    255.255.255.255   trust" >>/usr/local/pgsql/data/pg_hba.conf
+        </userinput>
+      </para>
+      <para>
+Startup postgres with the -i option to allow internet domain sockets
+      </para>
+      <para>
+        <userinput><prompt>[postgres]$ </prompt>
+/usr/local/pgsql/bin/postmaster -i -D /usr/local/pgsql/data >/var/log/pgsql 2>&amp;1 &amp;
+        </userinput>
+      </para>
+      <para>
+Add the "gold" user as a database administrator
+      </para>
+      <para>
+        <userinput><prompt>[postgres]$ </prompt>
+/usr/local/pgsql/bin/createuser gold
+        </userinput>
+      </para>
+      <screen>
+Shall the new user be allowed to create databases? y
+Shall the new user be allowed to create more new users? n
+      </screen>
+      <para>
+Create the gold database
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+/usr/local/pgsql/bin/createdb gold
+        </userinput>
+      </para>
+      <para>
+Edit the Gold configuration files.
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+vi /usr/local/gold/etc/goldd.conf
+        </userinput>
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+vi /usr/local/gold/etc/gold.conf
+        </userinput>
+      </para>
+    </sect1>
+
+    <sect1 id="TomcatSetup">
+      <title>Web Server Setup</title>
+      <para>
+If you want to use the Gold web GUI, you will need to make some modifications to the tomcat configuration to support the use of SSL connections.
+      </para>
+      <para>
+Configure your environment with the following environment variables:
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+export CATALINA_HOME=/usr/local/jakarta-tomcat-4.1.29
+        </userinput>
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+export JAVA_HOME=/usr/local/j2sdk1.4.2_01
+        </userinput>
+      </para>
+      <para>
+Edit the server.xml file under $CATALINA_HOME/conf:
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+vi $CATALINA_HOME/conf/server.xml
+        </userinput>
+      </para>
+      <para>
+Uncomment the SSL connector. This will allow secure connections.
+You can specify the port, timeout, etc. according to your preferences.
+It might look something like this:
+        <screen>
+  &lt;Connector className="org.apache.catalina.connector.http.HttpConnector" port="8443" minProcessors="5" maxProcessors="75" enableLookups="true" redirectPort="8443" acceptCount="10" debug="0" scheme="https" secure="true" connectionTimeout="60000"&gt;
+    &lt;Factory className="org.apache.catalina.net.SSLServerSocketFactory" clientAuth="false" protocol="TLS"/&gt;
+  &lt;/Connector&gt;
+        </screen>
+      </para>
+      <para>
+Create a certificate keystore by executing the following command
+and specify a password value of "changeit". For more help, see
+&lt;http://jakarta.apache.org/tomcat/tomcat-4.1-doc/ssl-howto.html&gt;.
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+$JAVA_HOME/bin/keytool -genkey -alias tomcat -keyalg RSA
+        </userinput>
+      </para>
+      <para>
+Startup Tomcat.
+The make gui-install step should have copied the gold.war file into
+the $CATALINA_HOME/webapps directory. When tomcat is started up, it
+should unpack the jar into a gold directory here after a few seconds.
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+$CATALINA_HOME/bin/startup.sh
+        </userinput>
+      </para>
+      <para>
+Edit the servlet container's gold.conf file
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+vi $CATALINA_HOME/webapps/gold/etc/gold.conf
+        </userinput>
+  # At a minimum you will want to specify the server.host and log4j.appender.Log.File
+      </para>
+      <para>
+Restart Tomcat
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+$CATALINA_HOME/bin/shutdown.sh
+        </userinput>
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+$CATALINA_HOME/bin/startup.sh
+        </userinput>
+      </para>
+    </sect1>
+
+    <sect1 id="Bootstrap">
+      <title>Bootstrap</title>
+      <para>
+You will need to populate the gold database with an sql dump that defines the objects,
+actions and attributes necessary to function as an Accounting and Allocation Manager.
+      </para>
+      <para>
+If you are using PostgreSQL:
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+/usr/local/pgsql/bin/psql gold &lt; bank.sql
+        </userinput>
+      </para>
+      <para>
+If you are using SQLite:
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+/usr/local/gold/sbin/sqlite /usr/local/gold/data/gold.db &lt; bank.sql
+        </userinput>
+      </para>
+    </sect1>
+
+    <sect1 id="Startup">
+      <title>Startup</title>
+      <para>
+Start the gold server daemon. It is located in the PREFIX/sbin directory.
+      </para>
+      <para>
+        <userinput><prompt>[gold]$ </prompt>
+/usr/local/gold/sbin/goldd
+        </userinput>
+      </para>
+      <para>
+Alternatively, if you are on linux system that supports init.d scripts,
+you can add an add gold as a system startup service by copying etc/gold.d to
+/etc/init.d/gold, giving it execute permission, and then start gold by issuing:
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+service gold start
+        </userinput>
+      </para>
+    </sect1>
+
+    <sect1 id="Initialization">
+      <title>Initialization</title>
+      <para>
+You are now ready to define users, projects, machines, accounts etc. as necessary for your site. The next chapter (Getting Started) provides a useful primer for this phase of the Gold setup.
+      </para>
+    </sect1>
+
+</chapter>

@@ -1,0 +1,86 @@
+/* 
+    Document   : input
+    Created on : August 18, 2003, 2:20 PM
+    Author     : zjohns
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+
+    
+.conditionrow{
+    clear: both;
+    width: 38em;
+    margin: auto;
+}
+.fieldqueryrow{
+    clear: both;
+    width: 15em;
+    margin: auto;
+}
+.fieldmodifyrow{
+    clear: both;
+    width: 24em;
+    margin: auto;
+}
+.optionrow{
+    clear: both;
+    width: 20em;
+    margin: auto;
+}
+.optionName{
+    float: left;
+    width: 9em;
+} 
+.optionValue{
+    float: left;
+    width: 9em;
+} 
+.header{
+    margin: auto;
+}
+.fieldName{
+    float: left;
+    width: 9em;
+    text-align: center;
+}
+.fieldOperator{
+    float: left;
+    width: 5em;
+    text-align: center;
+}
+.fieldValue{
+    float: left;
+    width: 9em;
+    text-align: center;
+} 
+.conjunction{
+    float: left;
+    width: 6em;
+    text-align: center;
+}
+.grouping{
+    float: left;
+    width: 4em;
+    text-align: center;
+}
+.conditionName{
+    float: left;
+    width: 9em;
+    text-align: center;
+}
+.conditionOperator{
+    float: left;
+    width: 5em;
+    text-align: center;
+}
+.conditionValue{
+    float: left;
+    width: 9em;
+    text-align: center;
+}
+.ungrouping{
+    float: left;
+    width: 4em ;
+    text-align: center;
+}

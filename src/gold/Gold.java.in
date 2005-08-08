@@ -1,0 +1,81 @@
+/******************************************************************************
+ *                                                                            *
+ *                          Copyright (c) 2003, 2004                          *
+ *                 Pacific Northwest National Laboratory,                     *
+ *                        Battelle Memorial Institute.                        *
+ *                            All rights reserved.                            *
+ *                                                                            *
+ ******************************************************************************
+ *                                                                            *
+ *    Redistribution and use in source and binary forms, with or without      *
+ *    modification, are permitted provided that the following conditions      *
+ *    are met:                                                                *
+ *                                                                            *
+ *    · Redistributions of source code must retain the above copyright        *
+ *    notice, this list of conditions and the following disclaimer.           *
+ *                                                                            *
+ *    · Redistributions in binary form must reproduce the above copyright     *
+ *    notice, this list of conditions and the following disclaimer in the     *
+ *    documentation and/or other materials provided with the distribution.    *
+ *                                                                            *
+ *    · Neither the name of Battelle nor the names of its contributors        *
+ *    may be used to endorse or promote products derived from this software   *
+ *    without specific prior written permission.                              *
+ *                                                                            *
+ *    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS     *
+ *    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT       *
+ *    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS       *
+ *    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE          *
+ *    COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,     *
+ *    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,    *
+ *    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;        *
+ *    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER        *
+ *    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT      *
+ *    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN       *
+ *    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE         *
+ *    POSSIBILITY OF SUCH DAMAGE.                                             *
+ *                                                                            *
+ ******************************************************************************/
+
+package gold;
+  
+import java.io.*;
+
+import org.apache.log4j.*;
+
+import gold.*;
+
+public class Gold implements Constants
+{
+	public static String AUTH_KEY = new String();
+  public static String datasource;
+  public static String dbuser;
+  public static String dbpasswd;
+    
+  static Logger log;
+
+  // initialize
+  public static void initialize() throws GoldException
+  {
+    // Read config file into system properties and initialize logging
+    Config.readConfig(System.getProperty("GOLD_HOME", "@prefix@") + "/etc/goldj.conf");
+    PropertyConfigurator.configure(System.getProperty("GOLD_HOME", "@prefix@") + "/etc/goldj.conf");
+    log = Logger.getLogger(gold.Gold.class);
+    log.debug("invoked with arguments: ()");
+
+    // Read in and set AUTH_KEY
+    String authFile = System.getProperty("GOLD_HOME") + "/etc/auth_key";
+    try
+    {
+      char[] keyBuf = new char[24];
+      FileReader fr = new FileReader(authFile);
+      int c = fr.read(keyBuf);
+      AUTH_KEY = String.copyValueOf(keyBuf).trim();
+    }
+    catch (Exception e)
+    {
+      throw new GoldException("400", "Failure detected while reading auth_key: " + e.getMessage());
+    }
+  }
+}
+
