@@ -59,61 +59,61 @@ DESCRIPTION
 
 FEATURES
 
-  · Rather than post-processing resource usage records on a periodic basis to
+  - Rather than post-processing resource usage records on a periodic basis to
   rectify project balances, acounts are updated immediately at job completion.
 
-  · A reservation is placed against the account for the estimated number of
+  - A reservation is placed against the account for the estimated number of
   resource credits before the job runs, followed by an appropriate charge at
   the moment the job completes, thereby preventing projects from using more
   resources than were allocated to them.
 
-  · A uniquely flexible account design allows resource credits to be allocated
+  - A uniquely flexible account design allows resource credits to be allocated
   to specific projects, users and machines.
 
-  · Resource credits may be restricted for use within a designated time period
+  - Resource credits may be restricted for use within a designated time period
   allowing sites to implement a use-it-or-lose-it policy to prevent year-end
   resource exhaustion and establishing a project cycle.
 
-  · The system can track and charge for composite resource usage (memory, disk,
+  - The system can track and charge for composite resource usage (memory, disk,
   CPU, etc) and custom charge multipliers can be applied (Quality of Service,
   Node Type, Time of Day, etc).
 
-  · Users and resource brokers can determine ahead of time the cost of using
+  - Users and resource brokers can determine ahead of time the cost of using
   resources via a guaranteed quote mechanism.
 
-  · Accounts feature an optional credit limit allowing support for both debit
+  - Accounts feature an optional credit limit allowing support for both debit
   and credit models. This feature can also be used to enable overdraft
   protection for specific accounts.
 
-  · Accounts may be nested creating an account hierarchy. This allows for the
+  - Accounts may be nested creating an account hierarchy. This allows for the
   delegation of management responsibilities, the establishment of automatic
   rules for the distribution of downstream resource credits, and the option of
   making higher level credits available to lower level accounts.
 
-  · Gold supports a powerful querying and update mechanism that facilitates
+  - Gold supports a powerful querying and update mechanism that facilitates
   flexible reporting and streamlines administrative tasks.
 
-  · Gold allows the establishment of default projects, machines and users.
+  - Gold allows the establishment of default projects, machines and users.
   Additionally Gold can allow user, machines and projects to be automatically
   created the first time they are seen by the resource management system.
   These features allow job submitters to use the system without even knowing it.
 
-  · Gold provides fine-grained (instance-level) Role Based Access Control for
+  - Gold provides fine-grained (instance-level) Role Based Access Control for
   all operations.
 
-  · Sites can create or modify record types on the fly enabling them to meet
+  - Sites can create or modify record types on the fly enabling them to meet
   their custom accounting needs. Dynamic object creation allows sites to
   customize the types of accounting data they collect without modifying the
   code. This capability turns this system into a generalized information
   service. This capability is extremely powerful and can be used to manage
   all varieties of custom data.
 
-  · Gold implements a journaling mechanism that preserves the indefinite
+  - Gold implements a journaling mechanism that preserves the indefinite
   historical state of all objects and records. This powerful mechanism allows
   historical bank statements to be generated, provides an undo/redo capability
   and allows commands to be run as if it were any arbitrary time in the past.
 
-  · A traceback mechanism can allow all parties of a transaction (resource
+  - A traceback mechanism can allow all parties of a transaction (resource
   requestor and provider) to have a first-hand record of the resource
   utilization and to have a say as to whether or not the job should be permitted
   to run, based on their independent policies and priorities. A job will only
@@ -122,13 +122,13 @@ FEATURES
   facilitate the establishment of trust and exchange relationships between
   administrative domains.
 
-  · The system was designed from the outset with goals of scalability, fault
+  - The system was designed from the outset with goals of scalability, fault
   tolerance, security, portability and ease of use in mind. 
 
-  · A web-based graphical user interface can be used to simplify use of Gold's
+  - A web-based graphical user interface can be used to simplify use of Gold's
   powerful features.
 
-  · Being open source allows for site self-sufficiency, customizability and
+  - Being open source allows for site self-sufficiency, customizability and
   promotes community development and interoperability.
 
 LICENSE
