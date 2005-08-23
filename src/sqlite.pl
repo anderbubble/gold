@@ -4,7 +4,13 @@ use strict;
 use lib qw(/usr/local/gold/lib/perl5);
 use DBI;
 
-my $GOLD_DB = $ARGV[0];
+my $GOLD_HOME = "/usr/local/gold";
+my $GOLD_DB = "$GOLD_HOME/data/gold.db";
+
+if (defined $ARGV[0]){
+	$GOLD_DB = $ARGV[0];
+}
+
 $ENV{PATH} = "/bin:/usr/bin";
 delete @ENV{ 'IFS', 'CDPATH', 'ENV', 'BASH_ENV' }; 
 
