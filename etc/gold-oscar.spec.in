@@ -84,9 +84,11 @@ make build_root=$RPM_BUILD_ROOT install
 cp bank.gold base.sql bank.sql sssrmap3.xsd ${RPM_BUILD_ROOT}%{prefix}
 cp src/gold_init.pl ${RPM_BUILD_ROOT}%{prefix}/sbin/gold_init
 chmod +x ${RPM_BUILD_ROOT}%{prefix}/sbin/gold_init
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
-cp etc/gold.d ${RPM_BUILD_ROOT}/etc/init.d/gold
-touch ${RPM_BUILD_ROOT}%{prefix}/etc/auth_key
+mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
+cp etc/gold.d ${RPM_BUILD_ROOT}/etc/rc.d/init.d/gold
+echo "AUTH" >  ${RPM_BUILD_ROOT}%{prefix}/etc/auth_key
+mkdir -p ${RPM_BUILD_ROOT}%{prefix}/log
+${RPM_BUILD_ROOT}%{prefix}/sbin/sqlite ${RPM_BUILD_ROOT}%{prefix}/data/gold.db < ${RPM_BUILD_ROOT}%{prefix}/bank.sql
 # Remove the docs so they can be installed in the defaultdocdir
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/doc
 
@@ -130,6 +132,7 @@ mkdir -p $RPM_BUILD_ROOT/%{profiled}
 %{prefix}/classes
 %{prefix}/data
 %{prefix}/lib
+%{prefix}/log
 %{prefix}/sbin
 %{prefix}/bank.gold
 %{prefix}/base.sql
@@ -138,7 +141,7 @@ mkdir -p $RPM_BUILD_ROOT/%{profiled}
 %config %{prefix}/etc/gold.conf
 %config %{prefix}/etc/goldj.conf
 %config %{prefix}/etc/goldd.conf
-%attr(0755,root,root) /etc/init.d/gold
+%attr(0755,root,root) /etc/rc.d/init.d/gold
 %doc doc/userguide.pdf README INSTALL LICENSE 
 %doc %dir doc/userguide
 %ghost %{prefix}/etc/auth_key

@@ -4,11 +4,11 @@ use strict;
 use lib qw(/usr/local/gold/lib/perl5);
 use DBI;
 
-my $GOLD_HOME = "/usr/local/gold";
+my $GOLD_DB = $ARGV[0];
 $ENV{PATH} = "/bin:/usr/bin";
 delete @ENV{ 'IFS', 'CDPATH', 'ENV', 'BASH_ENV' }; 
 
-my $dbh = DBI->connect("dbi:SQLite:dbname=${GOLD_HOME}/data/gold.db","","");
+my $dbh = DBI->connect("dbi:SQLite:dbname=$GOLD_DB","","");
 my $command = "";
 print "SQLite> ";
 while (<STDIN>)
@@ -16,6 +16,7 @@ while (<STDIN>)
 	chomp;
 	last if /^\s*qu?i?t?$/i;
 	next if /^--/;
+	next if /pg_catalog/;
 	next if /^\\/;
 	next if /^\s*$/;
 	$command .= $_;
