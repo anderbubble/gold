@@ -8,6 +8,8 @@
 #           29 JUL 2004 [Scott Jackson] perl alpha
 #           8 OCT 2004 [Scott Jackson] beta mods
 #           6 JUL 2005 [Scott Jackson] general release
+#           25AUG 2005 [Gary Skouson] Changed to register/unregister with
+#                                     the service-directory.
 #
 ################################################################################
 #                                                                              #

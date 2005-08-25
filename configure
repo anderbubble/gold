@@ -268,8 +268,8 @@ SHELL=${CONFIG_SHELL-/bin/sh}
 # Identity of this package.
 PACKAGE_NAME='Gold'
 PACKAGE_TARNAME='gold'
-PACKAGE_VERSION='2.0.0.0'
-PACKAGE_STRING='Gold 2.0.0.0'
+PACKAGE_VERSION='2.0.0.2'
+PACKAGE_STRING='Gold 2.0.0.2'
 PACKAGE_BUGREPORT='gold-support@sss.scl.ameslab.gov'
 
 ac_unique_file="src/goldd.pl.in"

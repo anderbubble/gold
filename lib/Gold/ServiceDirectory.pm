@@ -5,6 +5,8 @@
 #
 # File   :  ServiceDirectory.pm
 # History:  25 MAR 2005 [Scott Jackson] initial implementation
+#           25 AUG 2005 [Gary Skouson] Fixed this so it works.
+#
 #
 ################################################################################
 #                                                                              #
@@ -78,7 +80,7 @@ Perl 5.6
 
 =head1 AUTHOR
 
-Scott Jackson, Scott.Jackson@pnl.gov
+Gary Skouson, Gary.Skouson@pnl.gov
 
 =cut
 
