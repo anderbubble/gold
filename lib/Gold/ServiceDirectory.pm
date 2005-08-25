@@ -104,6 +104,74 @@ use Gold::Global;
 #use Gold::Response;
 #use Gold::Reply;
 
+#
+#
+#
+sub challengeSend{
+	my ($server, $port, $key, $msg) = @_;
+	my $socket = IO::Socket::INET->new(PeerAddr => $server,
+					   PeerPort => $port);
+	unless(defined($socket)){
+		return(-1);
+	}
+#	print "Socket Opened...\n";
+	#
+	# Grab the challenge string from the socket
+	#
+#	print "Grabbing challenge...\n";
+	my $challenge = <$socket>;
+	chomp($challenge);
+	unless(length($challenge)){
+		return(-1);
+	}
+#	print "Got '$challenge'\n";
+	#
+	# Send the hash of the appropriate response.
+	#
+	my $resp = md5_hex($challenge . $key);
+	print $socket "$resp\n";
+#	print "Sent response $resp\n";
+	#
+	# Check to see if we're in.
+	#
+	my $rc;
+	my $bytes = read($socket, $rc, 1);
+	unless($bytes || $rc == 1){
+		#
+		# Didn't make it.
+		#
+		return(-1);
+	}
+	#
+	# Build/send the message
+	#
+#	print "Sending Message '$msg'\n";
+	my $len = length($msg);
+	print $socket "$len $msg";
+
+	#
+	# See what they think about my request...
+	#
+	my $in;
+	$len = "";
+	while ($bytes = read($socket, $in, 1) && $in ne " "){
+		$len .= $in;
+	}
+#	print "Looking for $len bytes\n";
+	#
+	# Grab the rest of the data...
+	#
+	$bytes = read($socket, $in, $len);
+	#
+	# Check to see if there's an error.
+	#
+#	print "Got $in for a response...\n";
+	if ($in =~ /^.error/){
+		return(-1);
+	}
+	return(0);
+}
+
 # ----------------------------------------------------------------------------
 # $boolean = register();
 # ----------------------------------------------------------------------------
@@ -134,140 +202,14 @@ sub register
   my $serverPort = $config->get_property("server.port", $SERVER_PORT);
 
   # Build XML Payload
-  my $addLocation = "<add-location><location component=\"allocation-manager\" host=\"$serverHost\" port=\"$serverPort\" protocol=\"SSSRMAP\"/></add-location>";
+  my $addLocation = "<add-location><location><component>allocation-manager</component><host>$serverHost</host><port>$serverPort</port><protocol>challenge</protocol><schema_version>1234</schema_version><tier>1</tier></location></add-location> ";
   if ($log->is_debug())
   {
     $log->debug("Registering with the service directory ($serviceDirectoryHost:$serviceDirectoryPort): $addLocation");
   }
-
-  # Create the socket to the service directory
-  my $socket = IO::Socket::INET->new("$serviceDirectoryHost:$serviceDirectoryPort") or throw Gold::Exception("200", "Connection to service directory failed: $!");
-
-  # Service Directory uses challenge protocol
-  # Read in the challenge string
-  my $challenge = "";
-#  while (1) 
-#  {
-#    my $bytes_read = sysread($socket, my $byte, 1);
-#    if (defined($bytes_read))
-#    {
-#      if ($bytes_read == 1)
-#      {
-#        if ($byte eq "\n")
-#        {
-#          last;
-#        }
-#        else
-#        {
-#          $challenge .= $byte;
-#        }
-#      }
-#      else
-#      {
-#        throw Gold::Exception("246", "Unexpected end of file while reading challenge from service directory: $!");
-#      }
-#    }
-#    else
-#    {
-#      throw Gold::Exception("226", "Error reading from service directory: $!");
-#    }
-#  }
-  if ($challenge = <$socket>)
-  {
-    chomp($challenge);
-  }
-  else
-  {
-    throw Gold::Exception("246", "Error while reading challenge from service directory: $!");
-  }
-  if ($log->is_trace())
-  {
-    $log->trace("Read service directory challenge: $challenge");
-  }
- 
-  # Append service directory key, and create a hex encoded md5 digest
-  my $challengeResponse = md5_hex($challenge . $serviceDirectoryKey);
-
-  # Send the challenge response to the service directory
-  print $socket "$challengeResponse\n";
-  $socket->flush();
-  if ($log->is_trace())
-  {
-    $log->trace("Sent service directory challenge response: $challengeResponse");
-  }
-
-  # Read from the server whether the challenge succeeded or failed
-  my $byte_read = read($socket, my $rc, 1);
-  if ($rc != 1)
-  {
-    throw Gold::Exception("242", "Authentication with Service Directory failed: ($rc)");
-  }
-  if ($log->is_trace())
-  {
-    $log->trace("Read service directory challenge status: $rc");
-  }
-
-  # Write out int message length and a space delimiter
-  print $socket length($addLocation) . " ";
-
-  # Write out payload
-  print $socket $addLocation;
-  $socket->flush();
-  if ($log->is_trace())
-  {
-    $log->trace("Sent service directory register request: $addLocation");
-  }
-
-  # Peel off response size
-  my $responseSize = "";
-  while (1) 
-  {
-    my $bytes_read = read($socket, my $byte, 1);
-    if (defined($bytes_read))
-    {
-      if ($bytes_read == 1)
-      {
-        if ($byte eq " ")
-        {
-          last;
-        }
-        else
-        {
-          $responseSize .= $byte;
-        }
-      }
-      else
-      {
-        throw Gold::Exception("246", "Unexpected end of file while reading response size from service directory: $!");
-      }
-    }
-    else
-    {
-      throw Gold::Exception("226", "Error reading from service directory: $!");
-    }
-  }
-  if ($log->is_trace())
-  {
-    $log->trace("Read service directory response size: $responseSize");
-  }
-
-  # Read in reply chunk
-  my $bytes_remaining = $responseSize;
-  my $payload = "";
-  my $offset = 0;
-  my $bytes_read = read($server, $payload, $bytes_remaining, $offset);
-  if (defined($bytes_read))
-  {
-    $bytes_remaining -= $bytes_read;
-    $offset += $bytes_read;
-  }
-  else
-  {
-    throw Gold::Exception("226", "Error reading response from service directory: $!");
-  }
-  if ($log->is_trace())
-  {
-    $log->trace("Read response from service directory: $payload");
+  my $ret = &challengeSend($serviceDirectoryHost, $serviceDirectoryPort, $serviceDirectoryKey, $addLocation);
+  if ($ret){
+      throw Gold::Exception("246", "Unexpected end of file while reading challenge from service directory: $!");
   }
 
   return 0;
@@ -303,142 +245,16 @@ sub remove
   my $serverPort = $config->get_property("server.port", $SERVER_PORT);
 
   # Build XML Payload
-  my $delLocation = "<del-location><location component=\"allocation-manager\" host=\"$serverHost\" port=\"$serverPort\" protocol=\"SSSRMAP\"/></del-location>";
+  my $delLocation = "<del-location><location><component>allocation-manager</component><host>$serverHost</host><port>$serverPort</port></location></del-location>";
   if ($log->is_debug())
   {
     $log->debug("Unregistering from the service directory ($serviceDirectoryHost:$serviceDirectoryPort): $delLocation");
   }
 
-  # Create the socket to the service directory
-  my $socket = IO::Socket::INET->new("$serviceDirectoryHost:$serviceDirectoryPort") or throw Gold::Exception("200", "Connection to service directory failed: $!");
-
-  # Service Directory uses challenge protocol
-  # Read in the challenge string
-  my $challenge = "";
-#  while (1) 
-#  {
-#    my $bytes_read = sysread($socket, my $byte, 1);
-#    if (defined($bytes_read))
-#    {
-#      if ($bytes_read == 1)
-#      {
-#        if ($byte eq "\n")
-#        {
-#          last;
-#        }
-#        else
-#        {
-#          $challenge .= $byte;
-#        }
-#      }
-#      else
-#      {
-#        throw Gold::Exception("246", "Unexpected end of file while reading challenge from service directory: $!");
-#      }
-#    }
-#    else
-#    {
-#      throw Gold::Exception("226", "Error reading from service directory: $!");
-#    }
-#  }
-  if ($challenge = <$socket>)
-  {
-    chomp($challenge);
+  my $ret = &challengeSend($serviceDirectoryHost, $serviceDirectoryPort, $serviceDirectoryKey, $delLocation);
+  if ($ret){
+      throw Gold::Exception("246", "Unexpected end of file while while unregistering: $!");
   }
-  else
-  {
-    throw Gold::Exception("246", "Error while reading challenge from service directory: $!");
-  }
-  if ($log->is_trace())
-  {
-    $log->trace("Read service directory challenge: $challenge");
-  }
- 
-  # Append service directory key, and create a hex encoded md5 digest
-  my $challengeResponse = md5_hex($challenge . $serviceDirectoryKey);
-
-  # Send the challenge response to the service directory
-  print $socket "$challengeResponse\n";
-  $socket->flush();
-  if ($log->is_trace())
-  {
-    $log->trace("Sent service directory challenge response: $challengeResponse");
-  }
-
-  # Read from the server whether the challenge succeeded or failed
-  my $byte_read = read($socket, my $rc, 1);
-  if ($rc != 1)
-  {
-    throw Gold::Exception("242", "Authentication with Service Directory failed: ($rc)");
-  }
-  if ($log->is_trace())
-  {
-    $log->trace("Read service directory challenge status: $rc");
-  }
-
-  # Write out int message length and a space delimiter
-  print $socket length($addLocation) . " ";
-
-  # Write out payload
-  print $socket $delLocation;
-  $socket->flush();
-  if ($log->is_trace())
-  {
-    $log->trace("Sent service directory unregister request: $delLocation");
-  }
-
-  # Peel off response size
-  my $responseSize = "";
-  while (1) 
-  {
-    my $bytes_read = read($socket, my $byte, 1);
-    if (defined($bytes_read))
-    {
-      if ($bytes_read == 1)
-      {
-        if ($byte eq " ")
-        {
-          last;
-        }
-        else
-        {
-          $responseSize .= $byte;
-        }
-      }
-      else
-      {
-        throw Gold::Exception("246", "Unexpected end of file while reading response size from service directory: $!");
-      }
-    }
-    else
-    {
-      throw Gold::Exception("226", "Error reading from service directory: $!");
-    }
-  }
-  if ($log->is_trace())
-  {
-    $log->trace("Read service directory response size: $responseSize");
-  }
-
-  # Read in reply chunk
-  my $bytes_remaining = $responseSize;
-  my $payload = "";
-  my $offset = 0;
-  my $bytes_read = read($server, $payload, $bytes_remaining, $offset);
-  if (defined($bytes_read))
-  {
-    $bytes_remaining -= $bytes_read;
-    $offset += $bytes_read;
-  }
-  else
-  {
-    throw Gold::Exception("226", "Error reading response from service directory: $!");
-  }
-  if ($log->is_trace())
-  {
-    $log->trace("Read response from service directory: $payload");
-  }
-
   return 0;
 }
 

@@ -65,18 +65,30 @@ use Gold::Exception;
 use Gold::Global;
 use Gold::Reply;
 use Gold::Proxy;
+use Gold::ServiceDirectory;
+
 
 my $stale = 0;
 my $forking = @FORKING_SERVER@;
+
+sub exitHandle {
+  my ($signal) = @_;
+  # Notify the service directory if we need to.
+  if ($config->get_property("service.directory", $SERVICE_DIRECTORY) eq "true"){
+     my $rc = Gold::ServiceDirectory->remove();
+  }
+  exit(0);
+}
+
 
 Main:
 {
   # Set signal handlers
   $SIG{CHLD} = \&REAPER;
   $SIG{PIPE} = 'IGNORE';
-  #$SIG{INT} = 'sighandler';
+  $SIG{INT} = \&exitHandle;
   #$SIG{HUP} = 'sighandler';
-  #$SIG{TERM} = 'sighandler';
+  $SIG{TERM} = \&exitHandle;
 
   # Parse Command Line Arguments
   my ($shutdown, $restart, $startup, $status, $help, $man, $debug, $version);
@@ -229,6 +241,11 @@ Main:
     Listen => SOMAXCONN,
     Reuse => 1,
   ) or die "Unable to create server socket: $!\n";
+
+	# Notify the service directory if we need to.
+	if ($config->get_property("service.directory", $SERVICE_DIRECTORY) eq "true"){
+		my $rc = Gold::ServiceDirectory->register();
+	}
 
   # Loop -- waiting for client connections
   while(1)
