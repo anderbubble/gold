@@ -267,7 +267,7 @@ sub receiveChunk
   my $headerLine = <$client>;
   unless (defined $headerLine)
   {
-    throw Gold::Exception("242", "Null connection received.\n");
+    throw Gold::Exception("243", "Null connection received.\n");
   }
 
   $headerLine =~ s/\r\n//; # Remove trailing whitespace
