@@ -114,6 +114,7 @@ sub challengeSend{
 	my $socket = IO::Socket::INET->new(PeerAddr => $server,
 					   PeerPort => $port);
 	unless(defined($socket)){
+		close $socket;
 		return(-1);
 	}
 #	print "Socket Opened...\n";
@@ -124,6 +125,7 @@ sub challengeSend{
 	my $challenge = <$socket>;
 	chomp($challenge);
 	unless(length($challenge)){
+		close $socket;
 		return(-1);
 	}
 #	print "Got '$challenge'\n";
@@ -142,6 +144,7 @@ sub challengeSend{
 		#
 		# Didn't make it.
 		#
+		close $socket;
 		return(-1);
 	}
 	#
@@ -169,6 +172,7 @@ sub challengeSend{
 	#
 #	print "Got $in for a response...\n";
 	if ($in =~ /^.error/){
+		close $socket;
 		return(-1);
 	}
 	return(0);
@@ -204,7 +208,7 @@ sub register
   my $serverPort = $config->get_property("server.port", $SERVER_PORT);
 
   # Build XML Payload
-  my $addLocation = "<add-location><location><component>allocation-manager</component><host>$serverHost</host><port>$serverPort</port><protocol>challenge</protocol><schema_version>1234</schema_version><tier>1</tier></location></add-location> ";
+  my $addLocation = "<add-location><location><component>allocation-manager</component><host>$serverHost</host><port>$serverPort</port><protocol>basic</protocol><schema_version>1234</schema_version><tier>1</tier></location></add-location> ";
   if ($log->is_debug())
   {
     $log->debug("Registering with the service directory ($serviceDirectoryHost:$serviceDirectoryPort): $addLocation");

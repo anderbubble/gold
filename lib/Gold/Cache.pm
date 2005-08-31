@@ -480,10 +480,12 @@ sub populate
   $_stale = 0;
   
   # Log Cache DOM
-  if ($log->is_debug())
-  {
-    $log->debug("Cache DOM:\n" . $_doc->toString());
-  }
+  # Actually on second thought that's a lot of info.  I think I'll skip it.
+  #
+  #if ($log->is_debug())
+  #{
+  #  $log->debug("Cache DOM:\n" . $_doc->toString());
+  #}
 }
 
 # ----------------------------------------------------------------------------

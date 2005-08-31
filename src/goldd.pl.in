@@ -82,7 +82,6 @@ sub exitHandle {
   exit(0);
 }
 
-
 Main:
 {
   # Set signal handlers
@@ -285,13 +284,18 @@ Main:
       $log->info("New Connection Received");
     }
 
-    my $sendResponseOnFailure = 1;
+    my $sendResponseOnFailure = 0;
     my $code = 0;
     try
     {
       # Read in the message and request
       my $message = new Gold::Message(connection => $client);
       my $messageChunk = $message->receiveChunk();
+      #
+      # Once we have a message, we can try to send a response
+      #  if we need to.  Before this it may not make sense.
+      #
+      $sendResponseOnFailure = 1;
       my $request = $messageChunk->getRequest();
       my $chunking = $request->getChunking();
   
@@ -341,13 +345,18 @@ Main:
     catch Gold::Exception with
     {
       my $E = shift;
-      $log->error("Gold server error (", $E->{'-value'}, "): ", $E->{'-text'}, ".");
-      if ($sendResponseOnFailure)
-      {
-        my $response = new Gold::Response()->failure($E->{'-value'}, $E->{'-text'});
-        my $replyChunk = new Gold::Chunk()->setResponse($response);
-        my $reply = new Gold::Reply(connection => $client);
-        $reply->sendChunk($replyChunk);
+      #
+      # Error 243 is a null message.  I don't want to fill logs with that.
+      #
+      unless ($E->{'-value' == 243){
+         $log->error("Gold server error (", $E->{'-value'}, "): ", $E->{'-text'}, ".");
+         if ($sendResponseOnFailure)
+         {
+           my $response = new Gold::Response()->failure($E->{'-value'}, $E->{'-text'});
+           my $replyChunk = new Gold::Chunk()->setResponse($response);
+           my $reply = new Gold::Reply(connection => $client);
+           $reply->sendChunk($replyChunk);
+         }
       }
     }
     catch Error with
