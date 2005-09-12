@@ -348,7 +348,7 @@ Main:
       #
       # Error 243 is a null message.  I don't want to fill logs with that.
       #
-      unless ($E->{'-value' == 243){
+      unless ($E->{'-value'} == 243){
          $log->error("Gold server error (", $E->{'-value'}, "): ", $E->{'-text'}, ".");
          if ($sendResponseOnFailure)
          {
