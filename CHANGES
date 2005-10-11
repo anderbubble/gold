@@ -1,6 +1,8 @@
 Gold changes since beta release 2.0.b1.0:
-Release 2.0.0.2
+Release 2.0.0.4
 
+  Fix the Makefile so that it'll do the Perl CGI based gui
+    instead of the old Java one.
   Added code to register with a Service Directory for SSS
 
 General release 2.0.0.0

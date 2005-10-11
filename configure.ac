@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT(Gold, [2.0.0.2], [gold-support@sss.scl.ameslab.gov])
+AC_INIT(Gold, [2.0.0.4], [gold-support@sss.scl.ameslab.gov])
 AC_CONFIG_SRCDIR([src/goldd.pl.in])
 #AC_CONFIG_HEADER([config.h])
 
