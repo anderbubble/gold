@@ -162,7 +162,7 @@ make install
       </sect2>
 
       <sect2>
-        <title>PostgreSQL database 7.2 or higher [REQUIRED]</title>
+        <title>PostgreSQL database 7.2 or higher [OPTIONAL]</title>
         <para>
 Gold makes use of a database for transactions and data persistence. Two databases have been tested for use with Gold thus far: PostgreSQL and SQLite. Postgres is an external database that must be separately installed configured and started, while SQLite is an embedded database bundled with the Gold source code. If you intend to use the PostgreSQL database, you will need to install it.
 PostgreSQL is available at: &lt;http://www.postgresql.org/&gt;
@@ -301,10 +301,10 @@ make install
       </sect2>
 
       <sect2>
-        <title>Java 2 SDK 1.4 or higher [OPTIONAL]</title>
+        <title>Apache Httpd Server 2.0 or higher [OPTIONAL]</title>
         <para>
-Gold provides a web based gui so that managers, users and administrators can interact with the accounting and allocation system. This alpha gui is still under active development and has not been widely tested, however, it is made available at this stage in the hopes that it may be useful to you as is, and so that we can receive feedback, improvements, etc. The web interface utilizes Java Server Pages and needs to have a servlet container installed. A low-level java client also exists but most clients are written in Perl.
-Java 2 SDK is available at: &lt;http://java.sun.com/j2se&gt;
+Gold provides a web based gui so that managers, users and administrators can interact with the accounting and allocation system. This alpha gui is still under active development and has not been widely tested, however, it is made available at this stage in the hopes that it may be useful to you as is, and so that we can receive feedback, improvements, etc. The web interface utilizes Perl CGI and SSL and needs an httpd server (preferably apache).
+Apache httpd is available at: &lt;http://httpd.apache.org/j2se&gt;
         </para>
         <para>
           <userinput><prompt>[root]# </prompt>
@@ -312,30 +312,22 @@ cd /usr/local/src
           </userinput>
         </para>
         <para>
-Download j2sdk-1_4_2_01-linux-i586.bin ( or j2sdk-1_4_2_01-linux-i586-rpm.bin ) from http://java.sun.com/j2se/1.4/download.html
-        </para>
-        <para>
           <userinput><prompt>[root]# </prompt>
-chmod +x j2sdk-1_4_2_01-linux-i586.bin
+wget http://your.favorite.rpm.mirror/httpd-2.x.xxxxx.rpm
           </userinput>
         </para>
         <para>
           <userinput><prompt>[root]# </prompt>
-cd /usr/local
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-src/j2sdk-1_4_2_01-linux-i586.bin
+rpm -Uvh httpd-2.x.xxxxx.rpm
           </userinput>
         </para>
       </sect2>
 
       <sect2>
-        <title>Apache Tomcat Server 4 or higher [OPTIONAL]</title>
+        <title>OpenSSL 0.9.5a or higher [OPTIONAL]</title>
         <para>
-Gold provides a web based gui so that managers, users and administrators can interact with the accounting and allocation system. The web interface utilizes Java Server Pages and needs to have a servlet container installed.
-Tomcat is available at: &lt;http://jakarta.apache.org/tomcat/&gt;
+If you are installing the gui, you will need SSL (preferably OpenSSL).  OpenSSL is a command line toolkit for using secure socket layer encryption on a server.
+OpenSSL is available at: &lt;http://www.openssl.org/&gt;
         </para>
         <para>
           <userinput><prompt>[root]# </prompt>
@@ -343,17 +335,39 @@ cd /usr/local/src
           </userinput>
         </para>
         <para>
-wget ftp://ftp.tux.org/pub/net/apache/dist/jakarta/tomcat-4/v4.1.29/bin/jakarta-tomcat-4.1.29.tar.gz
+wget http://your.favorite.rpm.mirror/openssl-0.9.x.xxxx.rpm
         </para>
         <para>
           <userinput><prompt>[root]# </prompt>
-cd /usr/local
+rpm -Uvh openssl-0.9.x.xxxx.rpm
           </userinput>
+        </para>
+      </sect2>
+      <sect2>
+        <title>mod_ssl 2.26 or higher [OPTIONAL]</title>
+        <para>
+If you are installing the gui, you will need an apache interface to OpenSSL (preferable mod_ssl).  There are other alternatives to mod_ssl (one of which is apache-ssl from which the mod_ssl code was forked), however, mod_ssl has become the defacto standard and is the most widely adopted.
+mod_ssl is available at: &lt;http://www.modssl.org/&gt;
         </para>
         <para>
           <userinput><prompt>[root]# </prompt>
-gzip -cd src/jakarta-tomcat-4.1.29.tar.gz | tar xvf -
+cd /usr/local/src
           </userinput>
+        </para>
+        <para>
+wget http://your.favorite.rpm.mirror/mod_ssl-2.x.xxxx.rpm
+        </para>
+        <para>
+          <userinput><prompt>[root]# </prompt>
+rpm -Uvh mod_ssl-2.x.xxxx.rpm
+          </userinput>
+        </para>
+      </sect2>
+      <sect2>
+        <title>ssslib [OPTIONAL]</title>
+        <para>
+The ssslib package can be installed if you would like to use the Scalable System Software directory service.
+ssslib is available at: &lt;ftp://ftp.mcs.anl.gov/pub/sss/&gt;
         </para>
       </sect2>
     </sect1>
@@ -399,19 +413,13 @@ Use with-gold-libs to indicate whether you want to install the Gold modules in a
 
   &mdash;with-gold-libs=local|site  install policy for Gold perl libs [local]
 
+Use &mdash;with-cgi-bin to indicate where you want the Gold gui files for the web server to be installed.
+
+  &mdash;with-cgi-bin=PATH
+
 The PERL environment variable helps the install process find the desired (5.6) perl interpreter if it is not in your path or not found first in a path search.
 
   PERL        full pathname of the Perl interpreter
-
-The JAVA_HOME environment variable helps the install process locate the java, javac and jar executables. JAVA_HOME can be calculated by configure if the desired java executable is found in a path search.
-
-  JAVA_HOME   Java 2 SDK home directory (contains bin, lib, jre, ...)
-
-The CATALINA_HOME environment variable helps the install process locate the Tomcat home directory. This variable must be set if you want to use the web GUI.
-
-  CATALINA_HOME
-              Tomcat home directory (contains common, conf, logs, webapps
-              ...)
 
 Some other influential environment variables are:
   CC          C compiler command
@@ -431,7 +439,7 @@ cd gold-2.0.0.0
       </para>
       <para>
         <userinput><prompt>[gold]$ </prompt>
-./configure &mdash;prefix=/usr/local/gold CATALINA_HOME=/usr/local/jakarta-tomcat-4.1.29
+./configure &mdash;prefix=/usr/local/gold -with-cgi-bin=/var/www/cgi-bin
         </userinput>
       </para>
     </sect1>
@@ -444,14 +452,6 @@ To compile the program, type make:
       <para>
         <userinput><prompt>[gold]$ </prompt>
 make
-        </userinput>
-      </para>
-      <para>
-If you would like to try out the alpha web-gui, type make gui:
-      </para>
-      <para>
-        <userinput><prompt>[gold]$ </prompt>
-make gui
         </userinput>
       </para>
     </sect1>
@@ -472,6 +472,8 @@ make deps
 This will install the following Perl modules as necessary. By default, these will be installed under gold's lib/perl5 directory. To install these in the system site-perl directory, use the configure parameter with-perl-libs as described in the configuration section.
       </para>
       <literallayout>
+    CGI::Session
+    CGI
     Compress::Zlib
     Crypt::CBC
     Crypt::DES
@@ -499,7 +501,11 @@ This will install the following Perl modules as necessary. By default, these wil
     XML::NamespaceSupport
       </literallayout>
       <para>
-If you would prefer to do so, you could install these modules via other sources, such as from rpm, or from CPAN using 'perl -MCPAN -e shell'.
+If you would prefer to do so, you could install these modules via other sources,
+ such as from rpm, or from CPAN using 'perl -MCPAN -e shell'. If you installed l
+ibxml2 into /usr/local then you will probably need to add /usr/local/bin in fron
+t of your PATH so that xml-config can be located when installing the XML depende
+ncies.
       </para>
     </sect1>
 
@@ -547,7 +553,7 @@ Enter your secret key (up to 80 characters and can include spaces): sss
     <sect1 id="GeneralSetup">
       <title>General Setup</title>
       <para>
-Edit the Gold configuration files.
+Edit the Gold configuration files as necessary.
       </para>
       <para>
         <userinput><prompt>[gold]$ </prompt>
@@ -558,6 +564,13 @@ vi /usr/local/gold/etc/goldd.conf
         <userinput><prompt>[gold]$ </prompt>
 vi /usr/local/gold/etc/gold.conf
         </userinput>
+      </para>
+      <para>
+Configure your environment to set the following environment variables:
+
+PATH      - [RECOMMENDED] Should contain PREFIX/bin and PREFIX/sbin (for gold user).
+GOLD_HOME - [OPTIONAL]    Set to the installation root (PREFIX).
+
       </para>
     </sect1>
 
@@ -611,7 +624,7 @@ Create the gold database
         </userinput>
       </para>
       <para>
-Edit the Gold configuration files.
+You may need to edit the goldd.conf or gold.conf files to reflect the configuration of your database.
       </para>
       <para>
         <userinput><prompt>[gold]$ </prompt>
@@ -625,9 +638,24 @@ vi /usr/local/gold/etc/gold.conf
       </para>
     </sect1>
 
-    <sect1 id="TomcatSetup">
+    <sect1 id="WebServerSetup">
       <title>Web Server Setup</title>
       <para>
+If you want to use the Gold web GUI, you will need to configure your Httpd server to use SSL. For RedHat Linux systems, a good guide on this is "Buiding a Secure RedHat Apache Server HOWTO" at &lt;http://www.faqs.org/docs/Linux-HOWTO/SSL-RedHat-HOWTO.html&gt;.
+	</para>
+	<para>
+The following shows an example configuration that involves making some modifications to the httpd configuration to support the use of cgi-bin and SSL connections as well as the creation of a private key and a self-signed certificate.
+	</para>
+	<para>
+Edit the httpd.conf file under /etc/httpd/conf:
+	</para>
+	<para>
+		<userinput><prompt>[root]# </prompt>
+cd /etc/httpd/conf
+		</userinput>
+	</para>
+	<para>
+
 If you want to use the Gold web GUI, you will need to make some modifications to the tomcat configuration to support the use of SSL connections.
       </para>
       <para>
