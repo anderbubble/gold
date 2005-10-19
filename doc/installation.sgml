@@ -1,4 +1,4 @@
-  <chapter id="Installation">
+<chapter id="Installation">
     <title>Installation</title>
     <para>
 Gold uses the standard configure, make and make install steps that we all know and love. However, there are a number of preparation, prerequisite, setup and customization steps that need to be performed. This document provides general installation guidance and provides a number of sample steps referenced to a particular installation on a Linux platform using the bash shell. These steps indicate the userid in brackets performing the step. The exact commands to be performed and the user that issues them will vary based on the platform, shell, installation preferences, etc.
@@ -642,149 +642,158 @@ vi /usr/local/gold/etc/gold.conf
       <title>Web Server Setup</title>
       <para>
 If you want to use the Gold web GUI, you will need to configure your Httpd server to use SSL. For RedHat Linux systems, a good guide on this is "Buiding a Secure RedHat Apache Server HOWTO" at &lt;http://www.faqs.org/docs/Linux-HOWTO/SSL-RedHat-HOWTO.html&gt;.
-	</para>
-	<para>
+      </para>
+      <para>
 The following shows an example configuration that involves making some modifications to the httpd configuration to support the use of cgi-bin and SSL connections as well as the creation of a private key and a self-signed certificate.
-	</para>
-	<para>
+      </para>
+      <para>
 Edit the httpd.conf file under /etc/httpd/conf:
-	</para>
-	<para>
-		<userinput><prompt>[root]# </prompt>
-cd /etc/httpd/conf
-		</userinput>
-	</para>
-	<para>
-
-If you want to use the Gold web GUI, you will need to make some modifications to the tomcat configuration to support the use of SSL connections.
       </para>
       <para>
-Configure your environment with the following environment variables:
+	<userinput><prompt>[root]# </prompt>
+	  cd /etc/httpd/conf
+	</userinput>
       </para>
       <para>
-        <userinput><prompt>[root]# </prompt>
-export CATALINA_HOME=/usr/local/jakarta-tomcat-4.1.29
-        </userinput>
+	<userinput><prompt>[root]# </prompt>
+	  cp httpd.conf httpd.conf.orig
+	</userinput>
       </para>
       <para>
-        <userinput><prompt>[root]# </prompt>
-export JAVA_HOME=/usr/local/j2sdk1.4.2_01
-        </userinput>
+	<userinput><prompt>[root]# </prompt>
+	  vi httpd.conf
+	</userinput>
       </para>
       <para>
-Edit the server.xml file under $CATALINA_HOME/conf:
+      If you want to use the Gold web GUI, you will need to make some modifications to the tomcat configuration to support the use of SSL connections.
       </para>
       <para>
-        <userinput><prompt>[root]# </prompt>
-vi $CATALINA_HOME/conf/server.xml
-        </userinput>
+	Configure your environment with the following environment variables:
       </para>
       <para>
-Uncomment the SSL connector. This will allow secure connections.
-You can specify the port, timeout, etc. according to your preferences.
-It might look something like this:
+	<userinput><prompt>[root]# </prompt>
+	  export CATALINA_HOME=/usr/local/jakarta-tomcat-4.1.29
+	</userinput>
+      </para>
+      <para>
+	<userinput><prompt>[root]# </prompt>
+	  export JAVA_HOME=/usr/local/j2sdk1.4.2_01
+	</userinput>
+      </para>
+      <para>
+	Edit the server.xml file under $CATALINA_HOME/conf:
+      </para>
+      <para>
+	<userinput><prompt>[root]# </prompt>
+	  vi $CATALINA_HOME/conf/server.xml
+	</userinput>
+      </para>
+      <para>
+	Uncomment the SSL connector. This will allow secure connections.
+	You can specify the port, timeout, etc. according to your preferences.
+	It might look something like this:
         <screen>
-  &lt;Connector className="org.apache.catalina.connector.http.HttpConnector" port="8443" minProcessors="5" maxProcessors="75" enableLookups="true" redirectPort="8443" acceptCount="10" debug="0" scheme="https" secure="true" connectionTimeout="60000"&gt;
-    &lt;Factory className="org.apache.catalina.net.SSLServerSocketFactory" clientAuth="false" protocol="TLS"/&gt;
-  &lt;/Connector&gt;
+	  &lt;Connector className="org.apache.catalina.connector.http.HttpConnector" port="8443" minProcessors="5" maxProcessors="75" enableLookups="true" redirectPort="8443" acceptCount="10" debug="0" scheme="https" secure="true" connectionTimeout="60000"&gt;
+	  &lt;Factory className="org.apache.catalina.net.SSLServerSocketFactory" clientAuth="false" protocol="TLS"/&gt;
+	  &lt;/Connector&gt;
         </screen>
       </para>
       <para>
-Create a certificate keystore by executing the following command
-and specify a password value of "changeit". For more help, see
-&lt;http://jakarta.apache.org/tomcat/tomcat-4.1-doc/ssl-howto.html&gt;.
+	Create a certificate keystore by executing the following command
+	and specify a password value of "changeit". For more help, see
+	&lt;http://jakarta.apache.org/tomcat/tomcat-4.1-doc/ssl-howto.html&gt;.
       </para>
       <para>
         <userinput><prompt>[root]# </prompt>
-$JAVA_HOME/bin/keytool -genkey -alias tomcat -keyalg RSA
+	  $JAVA_HOME/bin/keytool -genkey -alias tomcat -keyalg RSA
         </userinput>
       </para>
       <para>
-Startup Tomcat.
-The make gui-install step should have copied the gold.war file into
-the $CATALINA_HOME/webapps directory. When tomcat is started up, it
-should unpack the jar into a gold directory here after a few seconds.
+	Startup Tomcat.
+	The make gui-install step should have copied the gold.war file into
+	the $CATALINA_HOME/webapps directory. When tomcat is started up, it
+	should unpack the jar into a gold directory here after a few seconds.
       </para>
       <para>
         <userinput><prompt>[root]# </prompt>
-$CATALINA_HOME/bin/startup.sh
+	  $CATALINA_HOME/bin/startup.sh
         </userinput>
       </para>
       <para>
-Edit the servlet container's gold.conf file
+	Edit the servlet container's gold.conf file
       </para>
       <para>
         <userinput><prompt>[root]# </prompt>
-vi $CATALINA_HOME/webapps/gold/etc/gold.conf
+	  vi $CATALINA_HOME/webapps/gold/etc/gold.conf
         </userinput>
-  # At a minimum you will want to specify the server.host and log4j.appender.Log.File
+	# At a minimum you will want to specify the server.host and log4j.appender.Log.File
       </para>
       <para>
-Restart Tomcat
+	Restart Tomcat
       </para>
       <para>
         <userinput><prompt>[root]# </prompt>
-$CATALINA_HOME/bin/shutdown.sh
+	  $CATALINA_HOME/bin/shutdown.sh
         </userinput>
       </para>
       <para>
         <userinput><prompt>[root]# </prompt>
-$CATALINA_HOME/bin/startup.sh
+	  $CATALINA_HOME/bin/startup.sh
         </userinput>
       </para>
     </sect1>
-
+    
     <sect1 id="Bootstrap">
       <title>Bootstrap</title>
       <para>
-You will need to populate the gold database with an sql dump that defines the objects,
-actions and attributes necessary to function as an Accounting and Allocation Manager.
+	You will need to populate the gold database with an sql dump that defines the objects,
+	actions and attributes necessary to function as an Accounting and Allocation Manager.
       </para>
       <para>
-If you are using PostgreSQL:
+	If you are using PostgreSQL:
       </para>
       <para>
         <userinput><prompt>[gold]$ </prompt>
-/usr/local/pgsql/bin/psql gold &lt; bank.sql
+	  /usr/local/pgsql/bin/psql gold &lt; bank.sql
         </userinput>
       </para>
       <para>
-If you are using SQLite:
+	If you are using SQLite:
       </para>
       <para>
         <userinput><prompt>[gold]$ </prompt>
-/usr/local/gold/sbin/sqlite /usr/local/gold/data/gold.db &lt; bank.sql
+	  /usr/local/gold/sbin/sqlite /usr/local/gold/data/gold.db &lt; bank.sql
         </userinput>
       </para>
     </sect1>
-
+    
     <sect1 id="Startup">
       <title>Startup</title>
       <para>
-Start the gold server daemon. It is located in the PREFIX/sbin directory.
+	Start the gold server daemon. It is located in the PREFIX/sbin directory.
       </para>
       <para>
         <userinput><prompt>[gold]$ </prompt>
-/usr/local/gold/sbin/goldd
+	  /usr/local/gold/sbin/goldd
         </userinput>
       </para>
       <para>
-Alternatively, if you are on linux system that supports init.d scripts,
-you can add an add gold as a system startup service by copying etc/gold.d to
-/etc/init.d/gold, giving it execute permission, and then start gold by issuing:
+	Alternatively, if you are on linux system that supports init.d scripts,
+	you can add an add gold as a system startup service by copying etc/gold.d to
+	/etc/init.d/gold, giving it execute permission, and then start gold by issuing:
       </para>
       <para>
         <userinput><prompt>[root]# </prompt>
-service gold start
+	  service gold start
         </userinput>
       </para>
     </sect1>
-
+    
     <sect1 id="Initialization">
       <title>Initialization</title>
       <para>
-You are now ready to define users, projects, machines, accounts etc. as necessary for your site. The next chapter (Getting Started) provides a useful primer for this phase of the Gold setup.
+	You are now ready to define users, projects, machines, accounts etc. as necessary for your site. The next chapter (Getting Started) provides a useful primer for this phase of the Gold setup.
       </para>
     </sect1>
-
+    
 </chapter>
