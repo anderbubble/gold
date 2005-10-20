@@ -41,7 +41,7 @@
       <affiliation><orgname>Pacific Northwest National Laboratory</orgname></affiliation>
     </author>
     <address><email>Scott.Jackson@pnl.gov</email></address>
-    <releaseinfo>2.0.0.4</releaseinfo>
+    <releaseinfo>2.0.0</releaseinfo>
     &copyright;
     &legalnotice;
   </bookinfo>
