@@ -93,6 +93,7 @@ CONFIGS     = etc/gold.conf etc/goldd.conf etc/goldj.conf
 CLASSPATH   = lib/xerces.jar:lib/jdom.jar:lib/log4j-1.2.8.jar
 GUICLASSPATH = gui/web/WEB-INF/lib/gold.jar:gui/web/WEB-INF/lib/jdom.jar:$(CATALINA_HOME)/common/lib/servlet.jar:$(CLASSPATH)
 DOCS        = userguide
+SGML        = doc/accounts.sgml doc/allocations.sgml doc/chargerates.sgml doc/configuration.sgml doc/copyright.sgml doc/customize.sgml doc/gettingadvanced.sgml doc/gettingstarted.sgml doc/goldsh.sgml doc/installation.sgml doc/integration.sgml doc/jobs.sgml doc/legalnotice.sgml doc/machines.sgml doc/overview.sgml doc/passwords.sgml doc/projects.sgml doc/quotations.sgml doc/reservations.sgml doc/roles.sgml doc/transactions.sgml doc/userguide.sgml doc/users.sgml
 PERL_MODULES = DBI-1.42 Data-Properties-0.02 Digest-1.05 Digest-SHA1-2.07 Digest-HMAC-1.01 Error-0.15 DateManip-5.42a Params-Validate-0.74 Time-HiRes-1.65 Log-Log4perl-0.42 Module-Build-0.25 Log-Dispatch-2.10 Log-Dispatch-FileRotate-1.11 MIME-Base64-3.01@READLINE_PACKAGE@ XML-NamespaceSupport-1.08 XML-SAX-0.12 XML-LibXML-Common-0.13 XML-LibXML-1.58_1 Digest-MD5-2.33 Crypt-DES-2.03 Crypt-DES_EDE3-0.01 Crypt-CBC-2.12 Compress-Zlib-1.33@DBD_PACKAGE@ CGI-Session-3.95 CGI.pm-3.10
 
 .PHONY: all java gui doc html man pdf test install install-java install-gui auth_key unistall dist reconfig commit clean distclean realclean
@@ -147,7 +148,7 @@ $(SBINS): Makefile
 
 doc: html man pdf
 
-html: doc/userguide.sgml
+html: $(SGML)
 	-@rm -rf doc/userguide.junk
 	cd doc && db2html userguide.sgml
 
@@ -155,7 +156,7 @@ man:
 
 pdf: doc/userguide.pdf
 
-doc/userguide.pdf: doc/userguide.sgml
+doc/userguide.pdf: $(SGML)
 	cd doc && db2pdf userguide.sgml
 
 test:

@@ -1,4 +1,9 @@
 Gold changes since beta release 2.0.b1.0:
+Release 2.0.0.5
+
+  Fix the documentation so that it appears that Postgres is
+    optional as it should be.
+
 Release 2.0.0.4
 
   Fix the Makefile so that it'll do the Perl CGI based gui
