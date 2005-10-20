@@ -1,13 +1,24 @@
 <chapter id="Installation">
     <title>Installation</title>
     <para>
-Gold uses the standard configure, make and make install steps that we all know and love. However, there are a number of preparation, prerequisite, setup and customization steps that need to be performed. This document provides general installation guidance and provides a number of sample steps referenced to a particular installation on a Linux platform using the bash shell. These steps indicate the userid in brackets performing the step. The exact commands to be performed and the user that issues them will vary based on the platform, shell, installation preferences, etc.
+Gold uses the standard configure, make and make install steps that we
+all know and love. However, there are a number of preparation,
+prerequisite, setup and customization steps that need to be
+performed. This document provides general installation guidance and
+provides a number of sample steps referenced to a particular
+installation on a Linux platform using the bash shell. These steps
+indicate the userid in brackets performing the step. The exact
+commands to be performed and the user that issues them will vary based
+on the platform, shell, installation preferences, etc. 
     </para>
 
     <sect1 id="Preparation">
       <title>Preparation</title>
       <para>
-To build and install Gold, you first need to unpack the archive and change directory into the top directory of the distribution.  For security reasons, it is recommended that you install and run Gold under its own non-root userid.
+To build and install Gold, you first need to unpack the archive and
+change directory into the top directory of the distribution.  For
+security reasons, it is recommended that you install and run Gold
+under its own non-root userid. 
       </para>
       <para>
         <userinput><prompt>[root]# </prompt>
@@ -50,7 +61,10 @@ You will first need to build, test and install the following prerequisites:
       <sect2>
         <title>Perl 5.6.1 or higher (with suidperl) [REQUIRED]</title>
         <para>
-The gold server and clients are written in Perl. Perl 5.6.1 or higher is required. The perl installation must include suidperl for proper client authentication. Use 'perl -v' to see what level of Perl is installed and 'suidperl -v' to see if suidperl is installed.
+The gold server and clients are written in Perl. Perl 5.6.1 or higher
+is required. The perl installation must include suidperl for proper
+client authentication. Use 'perl -v' to see what level of Perl is
+installed and 'suidperl -v' to see if suidperl is installed. 
 Perl is available at: &lt;http://www.perl.com/&gt;
         </para>
         <para>
@@ -99,7 +113,8 @@ make install
           </userinput>
         </para>
         <para>
-Or if you are using rpms, you will need the perl and the perl-suidperl rpms appropriate for your architecture and operating system:
+Or if you are using rpms, you will need the perl and the perl-suidperl
+rpms appropriate for your architecture and operating system: 
         </para>
         <para>
           <userinput><prompt>[root]# </prompt>
@@ -304,7 +319,7 @@ make install
         <title>Apache Httpd Server 2.0 or higher [OPTIONAL]</title>
         <para>
 Gold provides a web based gui so that managers, users and administrators can interact with the accounting and allocation system. This alpha gui is still under active development and has not been widely tested, however, it is made available at this stage in the hopes that it may be useful to you as is, and so that we can receive feedback, improvements, etc. The web interface utilizes Perl CGI and SSL and needs an httpd server (preferably apache).
-Apache httpd is available at: &lt;http://httpd.apache.org/j2se&gt;
+Apache httpd is available at: &lt;http://httpd.apache.org/&gt;
         </para>
         <para>
           <userinput><prompt>[root]# </prompt>
@@ -665,84 +680,76 @@ Edit the httpd.conf file under /etc/httpd/conf:
 	</userinput>
       </para>
       <para>
-      If you want to use the Gold web GUI, you will need to make some modifications to the tomcat configuration to support the use of SSL connections.
+	Edit your cgi-bin <bold>Directory</bold> to agree with the
+      cgi-bin directory you configured Gold to use and ensure it has
+      the following properties:
       </para>
       <para>
-	Configure your environment with the following environment variables:
+	<screen>
+&lt;Directory "/var/www/cgi-bin"&gt;
+  Options ExecCGI
+  AddHandler cgi-script .cgi .pl
+&lt;/Directory&gt;
+	</screen>
+      </para>
+      <para>
+	To add a virtual host definition and edit the appropriate
+      settings for your environment:
+      </para>
+      <para>
+      <screen>
+&lt;VirtualHost 192.168.72.24:443&gt;
+  DocumentRoot /var/www/cgi-bin
+  ServerName gold-server.whatever.org
+  ServerAdmin Your.Email@whatever.org
+  ErrorLog logs/gold-error_log
+  TransferLog logs/gold-access_log
+  SSLEngine on
+  SSLCertificateFile /etc/httpd/conf/ssl.crt/gold-server.crt
+  SSLCertificateKeyFile /etc/httpd/conf/ssl.key/gold-server.key
+  SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown
+&lt;/VirtualHost&gt;
+      </screen>
+      </para>
+      <para>
+	You also need to create the certificates and  private key for
+      gold as specified in the httpd.conf file for the ssl
+      communication.
       </para>
       <para>
 	<userinput><prompt>[root]# </prompt>
-	  export CATALINA_HOME=/usr/local/jakarta-tomcat-4.1.29
-	</userinput>
+	  openssl genrsa -out ssl.key/gold-server.key 1024
+	  </userinput>
+	</para>
+      <para>
+	You'll also need a certificate, you can create a self signed
+      one with:
+	</para>
+      <para><userinput><prompt>[root]# </prompt>
+	  openssl req -new -key ssl.key/gold-server.key -x509 -out ssl.crt/gold--server.crt
+      </para>
+      <para>
+	Once you get the certificates, keys and the httpd.conf
+      configured how you want it, you'll need to restart httpd.
       </para>
       <para>
 	<userinput><prompt>[root]# </prompt>
-	  export JAVA_HOME=/usr/local/j2sdk1.4.2_01
+	  /usr/sbin/apachectl restart
 	</userinput>
       </para>
       <para>
-	Edit the server.xml file under $CATALINA_HOME/conf:
+	<note>
+	  In order to use the web gui, users will have to generate
+      passwords for themselves using the gchpasswd client command.
+	  <userinput><prompt>[$user] </prompt>
+	    gchpasswd
+	  </userinput>
+	</note>
       </para>
       <para>
-	<userinput><prompt>[root]# </prompt>
-	  vi $CATALINA_HOME/conf/server.xml
-	</userinput>
+	To access the web gui, open a browser with url: https://your.server/gold.cgi
       </para>
-      <para>
-	Uncomment the SSL connector. This will allow secure connections.
-	You can specify the port, timeout, etc. according to your preferences.
-	It might look something like this:
-        <screen>
-	  &lt;Connector className="org.apache.catalina.connector.http.HttpConnector" port="8443" minProcessors="5" maxProcessors="75" enableLookups="true" redirectPort="8443" acceptCount="10" debug="0" scheme="https" secure="true" connectionTimeout="60000"&gt;
-	  &lt;Factory className="org.apache.catalina.net.SSLServerSocketFactory" clientAuth="false" protocol="TLS"/&gt;
-	  &lt;/Connector&gt;
-        </screen>
-      </para>
-      <para>
-	Create a certificate keystore by executing the following command
-	and specify a password value of "changeit". For more help, see
-	&lt;http://jakarta.apache.org/tomcat/tomcat-4.1-doc/ssl-howto.html&gt;.
-      </para>
-      <para>
-        <userinput><prompt>[root]# </prompt>
-	  $JAVA_HOME/bin/keytool -genkey -alias tomcat -keyalg RSA
-        </userinput>
-      </para>
-      <para>
-	Startup Tomcat.
-	The make gui-install step should have copied the gold.war file into
-	the $CATALINA_HOME/webapps directory. When tomcat is started up, it
-	should unpack the jar into a gold directory here after a few seconds.
-      </para>
-      <para>
-        <userinput><prompt>[root]# </prompt>
-	  $CATALINA_HOME/bin/startup.sh
-        </userinput>
-      </para>
-      <para>
-	Edit the servlet container's gold.conf file
-      </para>
-      <para>
-        <userinput><prompt>[root]# </prompt>
-	  vi $CATALINA_HOME/webapps/gold/etc/gold.conf
-        </userinput>
-	# At a minimum you will want to specify the server.host and log4j.appender.Log.File
-      </para>
-      <para>
-	Restart Tomcat
-      </para>
-      <para>
-        <userinput><prompt>[root]# </prompt>
-	  $CATALINA_HOME/bin/shutdown.sh
-        </userinput>
-      </para>
-      <para>
-        <userinput><prompt>[root]# </prompt>
-	  $CATALINA_HOME/bin/startup.sh
-        </userinput>
-      </para>
-    </sect1>
-    
+
     <sect1 id="Bootstrap">
       <title>Bootstrap</title>
       <para>
