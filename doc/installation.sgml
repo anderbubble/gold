@@ -699,6 +699,7 @@ The following shows an example configuration that involves making some modificat
 	</userinput>
 	<userinput><prompt>[root]# </prompt>
 	  openssl req -new -key ssl.key/gold-server.key -x509 -out ssl.crt/gold--server.crt
+	</userinput>
       </para>
       <para>
 	Once you get the certificates, keys and the httpd.conf
@@ -719,7 +720,7 @@ The following shows an example configuration that involves making some modificat
       <para>
 	To access the web gui, open a browser with url: https://your.server/gold.cgi
       </para>
-
+    </sect1>
     <sect1 id="Bootstrap">
       <title>Bootstrap</title>
       <para>
