@@ -662,29 +662,10 @@ If you want to use the Gold web GUI, you will need to configure your Httpd serve
 The following shows an example configuration that involves making some modifications to the httpd configuration to support the use of cgi-bin and SSL connections as well as the creation of a private key and a self-signed certificate.
       </para>
       <para>
-Edit the httpd.conf file under /etc/httpd/conf:
-      </para>
-      <para>
-	<userinput><prompt>[root]# </prompt>
-	  cd /etc/httpd/conf
-	</userinput>
-      </para>
-      <para>
-	<userinput><prompt>[root]# </prompt>
-	  cp httpd.conf httpd.conf.orig
-	</userinput>
-      </para>
-      <para>
-	<userinput><prompt>[root]# </prompt>
-	  vi httpd.conf
-	</userinput>
-      </para>
-      <para>
-	Edit your cgi-bin <bold>Directory</bold> to agree with the
-      cgi-bin directory you configured Gold to use and ensure it has
-      the following properties:
-      </para>
-      <para>
+	You'll need to edit the httpd.conf file under /etc/httpd/conf
+	or wherever your installation puts it.  You need to configure
+	it to make sure your cgi-bin directory agrees with the cgi-bin
+	directory you chose when you configured Gold.  Foe example:
 	<screen>
 &lt;Directory "/var/www/cgi-bin"&gt;
   Options ExecCGI
@@ -693,11 +674,9 @@ Edit the httpd.conf file under /etc/httpd/conf:
 	</screen>
       </para>
       <para>
-	To add a virtual host definition and edit the appropriate
-      settings for your environment:
-      </para>
-      <para>
-      <screen>
+	You may also need to add a VirtualHost definition with the
+      locations of the ssl certificates. It could look something like:
+	<screen>
 &lt;VirtualHost 192.168.72.24:443&gt;
   DocumentRoot /var/www/cgi-bin
   ServerName gold-server.whatever.org
@@ -712,20 +691,13 @@ Edit the httpd.conf file under /etc/httpd/conf:
       </screen>
       </para>
       <para>
-	You also need to create the certificates and  private key for
-      gold as specified in the httpd.conf file for the ssl
-      communication.
-      </para>
-      <para>
-	<userinput><prompt>[root]# </prompt>
+	The secure ssl communication will requre certificate and key
+      files as specified in the httpd.conf file.  To create these you
+      should be able to do something like:
+     	<userinput><prompt>[root]# </prompt>
 	  openssl genrsa -out ssl.key/gold-server.key 1024
-	  </userinput>
-	</para>
-      <para>
-	You'll also need a certificate, you can create a self signed
-      one with:
-	</para>
-      <para><userinput><prompt>[root]# </prompt>
+	</userinput>
+	<userinput><prompt>[root]# </prompt>
 	  openssl req -new -key ssl.key/gold-server.key -x509 -out ssl.crt/gold--server.crt
       </para>
       <para>
@@ -738,13 +710,11 @@ Edit the httpd.conf file under /etc/httpd/conf:
 	</userinput>
       </para>
       <para>
-	<note>
-	  In order to use the web gui, users will have to generate
+	In order to use the web gui, users will have to generate
       passwords for themselves using the gchpasswd client command.
-	  <userinput><prompt>[$user] </prompt>
-	    gchpasswd
-	  </userinput>
-	</note>
+	<userinput><prompt>[$user] </prompt>
+	  gchpasswd
+	</userinput>
       </para>
       <para>
 	To access the web gui, open a browser with url: https://your.server/gold.cgi
