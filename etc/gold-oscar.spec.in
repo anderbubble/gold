@@ -68,7 +68,7 @@ rm -rf $RPM_BUILD_ROOT
 #---------------------------------------------------------------------
    
 %build
-./configure --prefix %{prefix} --with-db=SQLite
+./configure --with-user=root --prefix %{prefix} --with-db=SQLite
 make build_root=$RPM_BUILD_ROOT
 
 

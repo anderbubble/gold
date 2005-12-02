@@ -176,6 +176,10 @@ Main:
   if (! defined $debug)
   {
     fork && exit;
+    #
+    # Set the process name to something useful
+    #
+    $0 = "GOLD_server";
     setpgrp();
     chdir("/tmp");
     umask(0);
