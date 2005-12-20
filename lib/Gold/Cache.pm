@@ -256,9 +256,9 @@ sub populate
     foreach my $objectRow (@{$objectResults->{data}})
     {
       my $objectName = $objectRow->[0];
-  
+
       # Create a new object node
-      my $object = $_doc->createElement($objectName);
+      my $object = $_doc->createElement("Object");
   
       # Populate the object's intrinsic properties
       for (my $i = 0; $i <= $objectCols; $i++)
@@ -284,10 +284,8 @@ sub populate
       # Iterate over all attributes for this object in database
   	  foreach my $attributeRow (@{$attributeResults->{data}})
   	  {
-  	    my $attributeName = $attributeRow->[1];
-  	
   	    # Create a new attribute node
-  	    my $attribute = $_doc->createElement($attributeName);
+  	    my $attribute = $_doc->createElement("Attribute");
   	
   	    # Populate the attribute's intrinsic properties
   	    for (my $i = 0; $i <= $attributeCols; $i++)
@@ -317,10 +315,8 @@ sub populate
       # Iterate over all actions for this object in database
   	  foreach my $actionRow (@{$actionResults->{data}})
   	  {
-  	    my $actionName = $actionRow->[1];
-  	
   	    # Create a new action node
-  	    my $action = $_doc->createElement($actionName);
+  	    my $action = $_doc->createElement("Action");
   	
   	    # Populate the action's intrinsic properties
   	    for (my $i = 0; $i <= $actionCols; $i++)
@@ -354,9 +350,9 @@ sub populate
     foreach my $roleRow (@{$roleResults->{data}})
     {
       my $roleName = $roleRow->[0];
-  
+
       # Create a new role node
-      my $role = $_doc->createElement($roleName);
+      my $role = $_doc->createElement("Role");
   
       # Populate the role's intrinsic properties
       for (my $i = 0; $i <= $roleCols; $i++)
@@ -382,11 +378,8 @@ sub populate
       # Iterate over all role actions for this role in database
   	  foreach my $roleActionRow (@{$roleActionResults->{data}})
   	  {
-  	    my $roleObjectName = $roleActionRow->[1];
-  	    my $roleActionName = $roleActionRow->[2];
-  	
   	    # Create a new role action node
-  	    my $roleAction = $_doc->createElement($roleObjectName . $roleActionName);
+  	    my $roleAction = $_doc->createElement("RoleAction");
   	
   	    # Populate the role action's intrinsic properties
   	    for (my $i = 0; $i <= $roleActionCols; $i++)
@@ -416,10 +409,8 @@ sub populate
       # Iterate over all role users for this role in database
   	  foreach my $roleUserRow (@{$roleUserResults->{data}})
   	  {
-  	    my $roleUserName = $roleUserRow->[1];
-  	
   	    # Create a new role user node
-  	    my $roleUser = $_doc->createElement($roleUserName);
+  	    my $roleUser = $_doc->createElement("RoleUser");
   	
   	    # Populate the role user's intrinsic properties
   	    for (my $i = 0; $i <= $roleUserCols; $i++)
@@ -452,10 +443,8 @@ sub populate
     # Iterate over all passwords in database
     foreach my $passwordRow (@{$passwordResults->{data}})
     {
-      my $passwordName = $passwordRow->[0];
-  
       # Create a new password node
-      my $password = $_doc->createElement($passwordName);
+      my $password = $_doc->createElement("Password");
   
       # Populate the password's intrinsic properties
       for (my $i = 0; $i <= $passwordCols; $i++)
@@ -503,7 +492,14 @@ sub objectExists
   }
 
   my @objectsNodes = $_doc->getElementsByTagName("Objects");
-  return $objectsNodes[0]->getChildrenByTagName($object) ? 1 : 0;
+  foreach my $objectNode ($objectsNodes[0]->childNodes())
+  {
+    if ($objectNode->getAttribute("Name") eq $object)
+    {
+      return 1;
+    }
+  }
+  return 0;
 }
 
 # ----------------------------------------------------------------------------
@@ -552,7 +548,7 @@ sub listObjects
   my @objectsNodes = $_doc->getElementsByTagName("Objects");
   foreach my $objectNode ($objectsNodes[0]->childNodes())
   {
-    push (@objectList, $objectNode->nodeName());
+    push (@objectList, $objectNode->getAttribute("Name"));
   }
   return @objectList;
 }
@@ -572,10 +568,12 @@ sub getObjectProperty
   }
 
   my @objectsNodes = $_doc->getElementsByTagName("Objects");
-  my @objectNodes = $objectsNodes[0]->getChildrenByTagName($object);
-  if (@objectNodes)
+  foreach my $objectNode ($objectsNodes[0]->childNodes())
   {
-    return $objectNodes[0]->getAttribute($property);
+    if ($objectNode->getAttribute("Name") eq $object)
+    {
+      return $objectNode->getAttribute($property);
+    }
   }
   return;
 }
@@ -595,16 +593,21 @@ sub attributeExists
   }
 
   my @objectsNodes = $_doc->getElementsByTagName("Objects");
-  my @objectNodes = $objectsNodes[0]->getChildrenByTagName($object);
-  if (@objectNodes)
+  foreach my $objectNode ($objectsNodes[0]->childNodes())
   {
-    my @attributesNodes = $objectNodes[0]->getChildrenByTagName("Attributes");
-    return $attributesNodes[0]->getChildrenByTagName($attribute) ? 1 : 0;
+    if ($objectNode->getAttribute("Name") eq $object)
+    {
+      my @attributesNodes = $objectNode->getChildrenByTagName("Attributes");
+      foreach my $attributeNode ($attributesNodes[0]->childNodes())
+      {
+        if ($attributeNode->getAttribute("Name") eq $attribute)
+        {
+          return 1;
+        }
+      }
+    }
   }
-  else
-  {
-    return 0;
-  }
+  return 0;
 }
 
 # ----------------------------------------------------------------------------
@@ -623,13 +626,15 @@ sub listAttributes
 
   my @attributeList = ();
   my @objectsNodes = $_doc->getElementsByTagName("Objects");
-  my @objectNodes = $objectsNodes[0]->getChildrenByTagName($object);
-  if (@objectNodes)
+  foreach my $objectNode ($objectsNodes[0]->childNodes())
   {
-    my @attributesNodes = $objectNodes[0]->getChildrenByTagName("Attributes");
-    foreach my $attributeNode ($attributesNodes[0]->childNodes())
+    if ($objectNode->getAttribute("Name") eq $object)
     {
-      push (@attributeList, $attributeNode->nodeName());
+      my @attributesNodes = $objectNode->getChildrenByTagName("Attributes");
+      foreach my $attributeNode ($attributesNodes[0]->childNodes())
+      {
+        push (@attributeList, $attributeNode->getAttribute("Name"));
+      }
     }
   }
   return @attributeList;
@@ -650,14 +655,18 @@ sub getAttributeProperty
   }
 
   my @objectsNodes = $_doc->getElementsByTagName("Objects");
-  my @objectNodes = $objectsNodes[0]->getChildrenByTagName($object);
-  if (@objectNodes)
+  foreach my $objectNode ($objectsNodes[0]->childNodes())
   {
-    my @attributesNodes = $objectNodes[0]->getChildrenByTagName("Attributes");
-    my @attributeNodes = $attributesNodes[0]->getChildrenByTagName($attribute);
-    if (@attributeNodes)
+    if ($objectNode->getAttribute("Name") eq $object)
     {
-      return $attributeNodes[0]->getAttribute($property);
+      my @attributesNodes = $objectNode->getChildrenByTagName("Attributes");
+      foreach my $attributeNode ($attributesNodes[0]->childNodes())
+      {
+        if ($attributeNode->getAttribute("Name") eq $attribute)
+        {
+          return $attributeNode->getAttribute($property);
+        }
+      }
     }
   }
   return;
@@ -678,16 +687,21 @@ sub actionExists
   }
 
   my @objectsNodes = $_doc->getElementsByTagName("Objects");
-  my @objectNodes = $objectsNodes[0]->getChildrenByTagName($object);
-  if (@objectNodes)
+  foreach my $objectNode ($objectsNodes[0]->childNodes())
   {
-    my @actionsNodes = $objectNodes[0]->getChildrenByTagName("Actions");
-    return $actionsNodes[0]->getChildrenByTagName($action) ? 1 : 0;
+    if ($objectNode->getAttribute("Name") eq $object)
+    {
+      my @actionsNodes = $objectNode->getChildrenByTagName("Actions");
+      foreach my $actionNode ($actionsNodes[0]->childNodes())
+      {
+        if ($actionNode->getAttribute("Name") eq $action)
+        {
+          return 1;
+        }
+      }
+    }
   }
-  else
-  {
-    return 0;
-  }
+  return 0;
 }
 
 # ----------------------------------------------------------------------------
@@ -706,13 +720,15 @@ sub listActions
 
   my @actionList = ();
   my @objectsNodes = $_doc->getElementsByTagName("Objects");
-  my @objectNodes = $objectsNodes[0]->getChildrenByTagName($object);
-  if (@objectNodes)
+  foreach my $objectNode ($objectsNodes[0]->childNodes())
   {
-    my @actionsNodes = $objectNodes[0]->getChildrenByTagName("Actions");
-    foreach my $actionNode ($actionsNodes[0]->childNodes())
+    if ($objectNode->getAttribute("Name") eq $object)
     {
-      push (@actionList, $actionNode->nodeName());
+      my @actionsNodes = $objectNode->getChildrenByTagName("Actions");
+      foreach my $actionNode ($actionsNodes[0]->childNodes())
+      {
+        push (@actionList, $actionNode->getAttribute("Name"));
+      }
     }
   }
   return @actionList;
@@ -733,14 +749,18 @@ sub getActionProperty
   }
 
   my @objectsNodes = $_doc->getElementsByTagName("Objects");
-  my @objectNodes = $objectsNodes[0]->getChildrenByTagName($object);
-  if (@objectNodes)
+  foreach my $objectNode ($objectsNodes[0]->childNodes())
   {
-    my @actionsNodes = $objectNodes[0]->getChildrenByTagName("Actions");
-    my @actionNodes = $actionsNodes[0]->getChildrenByTagName($action);
-    if (@actionNodes)
+    if ($objectNode->getAttribute("Name") eq $object)
     {
-      return $actionNodes[0]->getAction($property);
+      my @actionsNodes = $objectNode->getChildrenByTagName("Actions");
+      foreach my $actionNode ($actionsNodes[0]->childNodes())
+      {
+        if ($actionNode->getAttribute("Name") eq $action)
+        {
+          return $actionNode->getAttribute($property);
+        }
+      }
     }
   }
   return;
@@ -761,7 +781,14 @@ sub roleExists
   }
 
   my @rolesNodes = $_doc->getElementsByTagName("Roles");
-  return $rolesNodes[0]->getChildrenByTagName($role) ? 1 : 0;
+  foreach my $roleNode ($rolesNodes[0]->childNodes())
+  {
+    if ($roleNode->getAttribute("Name") eq $role)
+    {
+      return 1;
+    }
+  }
+  return 0;
 }
 
 # ----------------------------------------------------------------------------
@@ -782,7 +809,7 @@ sub listRoles
   my @rolesNodes = $_doc->getElementsByTagName("Roles");
   foreach my $roleNode ($rolesNodes[0]->childNodes())
   {
-    push (@roleList, $roleNode->nodeName());
+    push (@roleList, $roleNode->getAttribute("Name"));
   }
   return @roleList;
 }
@@ -802,10 +829,12 @@ sub getRoleProperty
   }
 
   my @rolesNodes = $_doc->getElementsByTagName("Roles");
-  my @roleNodes = $rolesNodes[0]->getChildrenByTagName($role);
-  if (@roleNodes)
+  foreach my $roleNode ($rolesNodes[0]->childNodes())
   {
-    return $roleNodes[0]->getAttribute($property);
+    if ($roleNode->getAttribute("Name") eq $role)
+    {
+      return $roleNode->getAttribute($property);
+    }
   }
   return;
 }
@@ -825,16 +854,17 @@ sub roleActionExists
   }
 
   my @rolesNodes = $_doc->getElementsByTagName("Roles");
-  my @roleNodes = $rolesNodes[0]->getChildrenByTagName($role);
-  if (@roleNodes)
+  foreach my $roleNode ($rolesNodes[0]->childNodes())
   {
-    my @roleActionsNodes = $roleNodes[0]->getChildrenByTagName("RoleActions");
-    my @roleActionNodes = $roleActionsNodes[0]->getChildrenByTagName($object . $action);
-    foreach my $roleActionNode (@roleActionNodes)
+    if ($roleNode->getAttribute("Name") eq $role)
     {
-      if ($roleActionNode->getAttribute("Instance") eq $instance)
+      my @roleActionsNodes = $roleNode->getChildrenByTagName("RoleActions");
+      foreach my $roleActionNode ($roleActionsNodes[0]->childNodes())
       {
-        return 1;
+        if ($roleActionNode->getAttribute("Object") eq $object && $roleActionNode->getAttribute("Name") eq $action && $roleActionNode->getAttribute("Instance") eq $instance)
+        {
+          return 1;
+        }
       }
     }
   }
@@ -857,18 +887,17 @@ sub listRoleActions
 
   my @roleActionList = ();
   my @rolesNodes = $_doc->getElementsByTagName("Roles");
-  my @roleNodes = $rolesNodes[0]->getChildrenByTagName($role);
-  if (@roleNodes)
+  foreach my $roleNode ($rolesNodes[0]->childNodes())
   {
-    my @roleActionsNodes = $roleNodes[0]->getChildrenByTagName("RoleActions");
-    foreach my $roleActionNode ($roleActionsNodes[0]->childNodes())
+    if ($roleNode->getAttribute("Name") eq $role)
     {
-      my $objectAttr = $roleActionNode->getAttribute("Object");
-      my $actionAttr = $roleActionNode->getAttribute("Name");
-      my $instanceAttr = $roleActionNode->getAttribute("Instance");
-      if ($objectAttr eq $object && $instanceAttr eq $instance)
+      my @roleActionsNodes = $roleNode->getChildrenByTagName("RoleActions");
+      foreach my $roleActionNode ($roleActionsNodes[0]->childNodes())
       {
-        push (@roleActionList, $actionAttr);
+        if ($roleActionNode->getAttribute("Object") eq $object && $roleActionNode->getAttribute("Instance") eq $instance)
+        {
+          push (@roleActionList, $roleActionNode->getAttribute("Name"));
+        }
       }
     }
   }
@@ -891,20 +920,22 @@ sub listRoleActionInstances
 
   my @roleActionInstanceList = ();
   my @rolesNodes = $_doc->getElementsByTagName("Roles");
-  my @roleNodes = $rolesNodes[0]->getChildrenByTagName($role);
-  if (@roleNodes)
+  foreach my $roleNode ($rolesNodes[0]->childNodes())
   {
-    my @roleActionsNodes = $roleNodes[0]->getChildrenByTagName("RoleActions");
-    foreach my $roleActionNode ($roleActionsNodes[0]->childNodes())
+    if ($roleNode->getAttribute("Name") eq $role)
     {
-      my $objectAttr = $roleActionNode->getAttribute("Object");
-      my $actionAttr = $roleActionNode->getAttribute("Name");
-      my $instanceAttr = $roleActionNode->getAttribute("Instance");
-      if (($objectAttr eq $object || $objectAttr eq "ANY") && ($actionAttr eq $action || $actionAttr eq "ANY"))
+      my @roleActionsNodes = $roleNode->getChildrenByTagName("RoleActions");
+      foreach my $roleActionNode ($roleActionsNodes[0]->childNodes())
       {
-        if (($instance eq "ANY" && $instanceAttr eq "ANY") || ($instance eq "SELF" && $instanceAttr eq "SELF") || ($instance eq "MEMBERS" && $instanceAttr eq "MEMBERS") || ($instance eq "ADMIN" && $instanceAttr eq "ADMIN") || ($instance eq "INSTANCE" && ($instanceAttr ne "ANY" && $instanceAttr ne "SELF" && $instanceAttr ne "MEMBERS" && $instanceAttr ne "ADMIN")))
+        my $objectAttr = $roleActionNode->getAttribute("Object");
+        my $actionAttr = $roleActionNode->getAttribute("Name");
+        my $instanceAttr = $roleActionNode->getAttribute("Instance");
+        if (($objectAttr eq $object || $objectAttr eq "ANY") && ($actionAttr eq $action || $actionAttr eq "ANY"))
         {
-          push (@roleActionInstanceList, $instanceAttr);
+          if (($instance eq "ANY" && $instanceAttr eq "ANY") || ($instance eq "SELF" && $instanceAttr eq "SELF") || ($instance eq "MEMBERS" && $instanceAttr eq "MEMBERS") || ($instance eq "ADMIN" && $instanceAttr eq "ADMIN") || ($instance eq "INSTANCE" && ($instanceAttr ne "ANY" && $instanceAttr ne "SELF" && $instanceAttr ne "MEMBERS" && $instanceAttr ne "ADMIN")))
+          {
+            push (@roleActionInstanceList, $instanceAttr);
+          }
         }
       }
     }
@@ -927,17 +958,17 @@ sub getRoleActionProperty
   }
 
   my @rolesNodes = $_doc->getElementsByTagName("Roles");
-  my @roleNodes = $rolesNodes[0]->getChildrenByTagName($role);
-  if (@roleNodes)
+  foreach my $roleNode ($rolesNodes[0]->childNodes())
   {
-    my @roleActionsNodes = $roleNodes[0]->getChildrenByTagName("RoleActions");
-    my @roleActionNodes = $roleActionsNodes[0]->getChildrenByTagName($object . $action);
-    if (@roleActionNodes)
+    if ($roleNode->getAttribute("Name") eq $role)
     {
-      my $instanceAttr = $roleActionNodes[0]->getAttribute("Instance");
-      if ($instanceAttr eq $instance)
+      my @roleActionsNodes = $roleNode->getChildrenByTagName("RoleActions");
+      foreach my $roleActionNode ($roleActionsNodes[0]->childNodes())
       {
-        return $roleActionNodes[0]->getAttribute($property);
+        if ($roleActionNode->getAttribute("Object") eq $object && $roleActionNode->getAttribute("Name") eq $action && $roleActionNode->getAttribute("Instance") eq $instance)
+        {
+          return $roleActionNode->getAttribute($property);
+        }
       }
     }
   }
@@ -959,16 +990,21 @@ sub roleUserExists
   }
 
   my @rolesNodes = $_doc->getElementsByTagName("Roles");
-  my @roleNodes = $rolesNodes[0]->getChildrenByTagName($role);
-  if (@roleNodes)
+  foreach my $roleNode ($rolesNodes[0]->childNodes())
   {
-    my @roleUsersNodes = $roleNodes[0]->getChildrenByTagName("RoleUsers");
-    return $roleUsersNodes[0]->getChildrenByTagName($user) ? 1 : 0;
+    if ($roleNode->getAttribute("Name") eq $role)
+    {
+      my @roleUsersNodes = $roleNode->getChildrenByTagName("RoleUsers");
+      foreach my $roleUserNode ($roleUsersNodes[0]->childNodes())
+      {
+        if ($roleUserNode->getAttribute("Name") eq $user)
+        {
+          return 1;
+        }
+      }
+    }
   }
-  else
-  {
-    return 0;
-  }
+  return 0;
 }
 
 # ----------------------------------------------------------------------------
@@ -987,13 +1023,15 @@ sub listRoleUsers
 
   my @roleUserList = ();
   my @rolesNodes = $_doc->getElementsByTagName("Roles");
-  my @roleNodes = $rolesNodes[0]->getChildrenByTagName($role);
-  if (@roleNodes)
+  foreach my $roleNode ($rolesNodes[0]->childNodes())
   {
-    my @roleUsersNodes = $roleNodes[0]->getChildrenByTagName("RoleUsers");
-    foreach my $roleUserNode ($roleUsersNodes[0]->childNodes())
+    if ($roleNode->getAttribute("Name") eq $role)
     {
-      push (@roleUserList, $roleUserNode->nodeName());
+      my @roleUsersNodes = $roleNode->getChildrenByTagName("RoleUsers");
+      foreach my $roleUserNode ($roleUsersNodes[0]->childNodes())
+      {
+        push (@roleUserList, $roleUserNode->getAttribute("Name"));
+      }
     }
   }
   return @roleUserList;
@@ -1018,10 +1056,12 @@ sub listUserRoles
   foreach my $roleNode ($rolesNodes[0]->childNodes())
   {
     my @roleUsersNodes = $roleNode->getChildrenByTagName("RoleUsers");
-    my @roleUserNodes = $roleUsersNodes[0]->getChildrenByTagName($user);
-    if (@roleUserNodes)
+    foreach my $roleUserNode ($roleUsersNodes[0]->childNodes())
     {
-      push (@userRoleList, $roleNode->nodeName());
+      if ($roleUserNode->getAttribute("Name") eq $user)
+      {
+        push (@userRoleList, $roleNode->getAttribute("Name"));
+      }
     }
   }
   return @userRoleList;
@@ -1042,27 +1082,31 @@ sub getRoleUserProperty
   }
 
   my @rolesNodes = $_doc->getElementsByTagName("Roles");
-  my @roleNodes = $rolesNodes[0]->getChildrenByTagName($role);
-  if (@roleNodes)
+  foreach my $roleNode ($rolesNodes[0]->childNodes())
   {
-    my @roleUsersNodes = $roleNodes[0]->getChildrenByTagName("RoleUsers");
-    my @roleUserNodes = $roleUsersNodes[0]->getChildrenByTagName($user);
-    if (@roleUserNodes)
+    if ($roleNode->getAttribute("Name") eq $role)
     {
-      return $roleUserNodes[0]->getAttribute($property);
+      my @roleUsersNodes = $roleNode->getChildrenByTagName("RoleUsers");
+      foreach my $roleUserNode ($roleUsersNodes[0]->childNodes())
+      {
+        if ($roleUserNode->getAttribute("Name") eq $user)
+        {
+          return $roleUserNode->getAttribute($property);
+        }
+      }
     }
   }
   return;
 }
 
 # ----------------------------------------------------------------------------
-# $boolean = passwordExists($password)
+# $boolean = passwordExists($user)
 # ----------------------------------------------------------------------------
 
 # Check if Password Exists
 sub passwordExists
 {
-  my ($class, $password) = @_;
+  my ($class, $user) = @_;
 
   if ($log->is_trace())
   {
@@ -1070,7 +1114,14 @@ sub passwordExists
   }
 
   my @passwordsNodes = $_doc->getElementsByTagName("Passwords");
-  return $passwordsNodes[0]->getChildrenByTagName($password) ? 1 : 0;
+  foreach my $passwordNode ($passwordsNodes[0]->childNodes())
+  {
+    if ($passwordNode->getAttribute("User") eq $user)
+    {
+      return 1;
+    }
+  }
+  return 0;
 }
 
 # ----------------------------------------------------------------------------
@@ -1087,13 +1138,13 @@ sub listPasswords
     $log->trace("invoked with arguments: (" , join(', ',@_[1..$#_]) , ")");
   }
 
-  my @passwordList = ();
+  my @userList = ();
   my @passwordsNodes = $_doc->getElementsByTagName("Passwords");
   foreach my $passwordNode ($passwordsNodes[0]->childNodes())
   {
-    push (@passwordList, $passwordNode->nodeName());
+    push (@userList, $passwordNode->getAttribute("User"));
   }
-  return @passwordList;
+  return @userList;
 }
 
 # ----------------------------------------------------------------------------
@@ -1103,7 +1154,7 @@ sub listPasswords
 # Get Password Property
 sub getPasswordProperty
 {
-  my ($class, $password, $property) = @_;
+  my ($class, $user, $property) = @_;
 
   if ($log->is_trace())
   {
@@ -1111,10 +1162,12 @@ sub getPasswordProperty
   }
 
   my @passwordsNodes = $_doc->getElementsByTagName("Passwords");
-  my @passwordNodes = $passwordsNodes[0]->getChildrenByTagName($password);
-  if (@passwordNodes)
+  foreach my $passwordNode ($passwordsNodes[0]->childNodes())
   {
-    return $passwordNodes[0]->getAttribute($property);
+    if ($passwordNode->getAttribute("User") eq $user)
+    {
+      return $passwordNode->getAttribute($property);
+    }
   }
   return;
 }
