@@ -1337,10 +1337,11 @@ sub charge
     }
   }
 
-  # Look for reservations for this job and its job id
+  # Look for reservations for this job to obtain the list of reserved
+  # allocations and its job id
   # This has to happen here to obtain its jobid
   # SELECT ReservationAllocation.Id,ReservationAllocation.Account,ReservationAllocation.Amount,Reservation.Job,Allocation.StartTime,Allocation.EndTime FROM Reservation,ReservationAllocation,Allocation WHERE Reservation.Id=ReservationAllocation.Reservation AND Reservation.Name=$jobId AND ReservationAllocation.Id=Allocation.Id
-  my %reservationAllocations = ();
+  my %allocations = ();
   $results = $database->select(objects => [ new Gold::Object(name => "Reservation"), new Gold::Object(name => "ReservationAllocation"), new Gold::Object(name => "Allocation") ], selections => [ new Gold::Selection(object => "ReservationAllocation", name => "Id"), new Gold::Selection(object => "ReservationAllocation", name => "Account"), new Gold::Selection(object => "ReservationAllocation", name => "Amount"), new Gold::Selection(object => "Reservation", name => "Job"), new Gold::Selection(object => "Allocation", name => "StartTime"), new Gold::Selection(object => "Allocation", name => "EndTime") ], conditions => [ new Gold::Condition(object => "Reservation", name => "Id", subject => "ReservationAllocation", value => "Reservation"), new Gold::Condition(object => "ReservationAllocation", name => "Id", subject => "Allocation", value => "Id"), new Gold::Condition(object => "Reservation", name => "Name", value => $jobId) ]);
   foreach my $row (@{$results->{data}})
   {
@@ -1351,10 +1352,11 @@ sub charge
     my $startTime = $row->[4];
     my $endTime = $row->[5];
 
-    $reservationAllocations{$allocationId}{balance} += $amount;
-    $reservationAllocations{$allocationId}{account} = $accountId;
-    $reservationAllocations{$allocationId}{startTime} = $startTime;
-    $reservationAllocations{$allocationId}{endTime} = $endTime;
+    $allocations{$allocationId}{balance} += $amount;
+    $allocations{$allocationId}{account} = $accountId;
+    $allocations{$allocationId}{startTime} = $startTime;
+    $allocations{$allocationId}{endTime} = $endTime;
+    $allocations{$allocationId}{weight} = 1000000 * $endTime;
     $id = $job;
   }
 
@@ -1487,7 +1489,6 @@ sub charge
   {
     my $remaining = $charge;
     my %accounts = ();
-    my %allocations = ();
 
     # Refresh Allocations
     my $subRequest = new Gold::Request(database => $database, object => "Allocation", action => "Refresh");
@@ -1769,172 +1770,143 @@ sub charge
       $log->debug("Post ancestral account list is: " . join ',', keys %accounts);
     }
   
-    # Fail if there are no acounts to withdraw from
-    if (! scalar keys %accounts)
+    if (scalar keys %accounts)
+    {
+      # Lookup active allocations from account list
+      # SELECT Id,Account,Amount,CreditLimit,StartTime,EndTime FROM Allocation WHERE StartTime<=$now AND EndTime>$now AND CallType=$callType AND (Account=<Id> ...)
+    
+      @selections =
+      (
+        new Gold::Selection(name => "Id"),
+        new Gold::Selection(name => "Account"),
+        new Gold::Selection(name => "Amount"),
+        new Gold::Selection(name => "CreditLimit"),
+        new Gold::Selection(name => "StartTime"),
+        new Gold::Selection(name => "EndTime"),
+      );
+    
+      @conditions =
+      (
+        new Gold::Condition(name => "CallType", value => $callType),
+        new Gold::Condition(name => "StartTime", value => $now, op => "LE"),
+        new Gold::Condition(name => "EndTime", value => $now, op => "GT")
+      );
+    
+      # Constrain to list of accepted ids
+      my $firstTime = 1;
+      my $counter = 0;
+      foreach my $id (keys %accounts)
+      {
+        $counter++;
+        my $lastTime = ($counter == scalar keys %accounts) ? 1 : 0;
+    
+        if ($firstTime && $lastTime)
+        {
+          push @conditions, new Gold::Condition(name => "Account", value => $id, conj => "And", group => "0");
+        }
+        elsif ($firstTime)
+        {
+          $firstTime = 0;
+          push @conditions, new Gold::Condition(name => "Account", value => $id, conj => "And", group => "+1");
+        }
+        elsif ($lastTime)
+        {
+          push @conditions, new Gold::Condition(name => "Account", value => $id, conj => "Or", group => "-1");
+        }
+        else
+        {
+          push @conditions, new Gold::Condition(name => "Account", value => $id, conj => "Or", group => "0");
+        }
+      }
+  
+      $results = $database->select(object => "Allocation", selections => \@selections, conditions => \@conditions);
+      foreach my $row (@{$results->{data}})
+      {
+        my $allocationId = $row->[0];
+        my $accountId = $row->[1];
+        my $allocationAmount = $row->[2];
+        my $allocationCreditLimit = $row->[3];
+        my $allocationStartTime = $row->[4];
+        my $allocationEndTime = $row->[5];
+        
+        $allocations{$allocationId}{account} = $accountId;
+        $allocations{$allocationId}{endTime} = $allocationEndTime;
+        $allocations{$allocationId}{startTime} = $allocationStartTime;
+        $allocations{$allocationId}{weight} ||= $distance * $allocationEndTime + $accounts{$accountId};
+        $allocations{$allocationId}{balance} += $allocationAmount + $allocationCreditLimit;
+      }
+    
+      # Subtract reservations from allocation balances (including my own)
+      # Lookup reservation amounts against these allocations
+      # SELECT ReservationAllocation.Id,ReservationAllocation.Amount FROM Reservation,ReservationAllocation WHERE Reservation.Id=ReservationAllocation.Reservation AND Reservation.StartTime<=$now AND Reservation.EndTime>$now AND (Account=<Id> ...)
+    
+      my @objects =
+      (
+        new Gold::Object(name => "Reservation"),
+        new Gold::Object(name => "ReservationAllocation"),
+      );
+  
+      @selections =
+      (
+        new Gold::Selection(object => "ReservationAllocation", name => "Id"),
+        new Gold::Selection(object => "ReservationAllocation", name => "Amount"),
+      );
+    
+      @conditions =
+      (
+        new Gold::Condition(object => "Reservation", name => "Id", subject => "ReservationAllocation", value => "Reservation"),
+        new Gold::Condition(object => "Reservation", name => "StartTime", value => $now, op => "LE"),
+        new Gold::Condition(object => "Reservation", name => "EndTime", value => $now, op => "GT"),
+      );
+    
+      # Constrain to list of accepted allocation ids
+      $firstTime = 1;
+      $counter = 0;
+      foreach my $id (keys %allocations)
+      {
+        $counter++;
+        my $lastTime = ($counter == scalar keys %allocations) ? 1 : 0;
+    
+        if ($firstTime && $lastTime)
+        {
+          push @conditions, new Gold::Condition(object => "ReservationAllocation", name => "Id", value => $id, conj => "And", group => "0");
+        }
+        elsif ($firstTime)
+        {
+          $firstTime = 0;
+          push @conditions, new Gold::Condition(object => "ReservationAllocation", name => "Id", value => $id, conj => "And", group => "+1");
+        }
+        elsif ($lastTime)
+        {
+          push @conditions, new Gold::Condition(object => "ReservationAllocation", name => "Id", value => $id, conj => "Or", group => "-1");
+        }
+        else
+        {
+          push @conditions, new Gold::Condition(object => "ReservationAllocation", name => "Id", value => $id, conj => "Or", group => "0");
+        }
+      }
+    
+      $results = $database->select(objects => \@objects, selections => \@selections, conditions => \@conditions);
+      foreach my $row (@{$results->{data}})
+      {
+        my $allocationId = $row->[0];
+        my $reservationAmount = $row->[1];
+        
+        if (exists $allocations{$allocationId})
+        {
+          $allocations{$allocationId}{balance} -= $reservationAmount;
+        }
+      }
+    }
+  
+    # Fail if there are no allocations to withdraw from
+    if (! scalar keys %allocations)
     {
       return new Gold::Response()->failure("782", "Insufficient funds: There are no valid allocations against which to issue the charge");
     }
-  
-    # Lookup active allocations from account list
-    # SELECT Id,Account,Amount,CreditLimit,StartTime,EndTime FROM Allocation WHERE StartTime<=$now AND EndTime>$now AND CallType=$callType AND (Account=<Id> ...)
-  
-    @selections =
-    (
-      new Gold::Selection(name => "Id"),
-      new Gold::Selection(name => "Account"),
-      new Gold::Selection(name => "Amount"),
-      new Gold::Selection(name => "CreditLimit"),
-      new Gold::Selection(name => "StartTime"),
-      new Gold::Selection(name => "EndTime"),
-    );
-  
-    @conditions =
-    (
-      new Gold::Condition(name => "CallType", value => $callType),
-      new Gold::Condition(name => "StartTime", value => $now, op => "LE"),
-      new Gold::Condition(name => "EndTime", value => $now, op => "GT")
-    );
-  
-    # Constrain to list of accepted ids
-    my $firstTime = 1;
-    my $counter = 0;
-    foreach my $id (keys %accounts)
-    {
-      $counter++;
-      my $lastTime = ($counter == scalar keys %accounts) ? 1 : 0;
-  
-      if ($firstTime && $lastTime)
-      {
-        push @conditions, new Gold::Condition(name => "Account", value => $id, conj => "And", group => "0");
-      }
-      elsif ($firstTime)
-      {
-        $firstTime = 0;
-        push @conditions, new Gold::Condition(name => "Account", value => $id, conj => "And", group => "+1");
-      }
-      elsif ($lastTime)
-      {
-        push @conditions, new Gold::Condition(name => "Account", value => $id, conj => "Or", group => "-1");
-      }
-      else
-      {
-        push @conditions, new Gold::Condition(name => "Account", value => $id, conj => "Or", group => "0");
-      }
-    }
 
-    $results = $database->select(object => "Allocation", selections => \@selections, conditions => \@conditions);
-    foreach my $row (@{$results->{data}})
-    {
-      my $allocationId = $row->[0];
-      my $accountId = $row->[1];
-      my $allocationAmount = $row->[2];
-      my $allocationCreditLimit = $row->[3];
-      my $allocationStartTime = $row->[4];
-      my $allocationEndTime = $row->[5];
-      
-      $allocations{$allocationId}{account} = $accountId;
-      $allocations{$allocationId}{endTime} = $allocationEndTime;
-      $allocations{$allocationId}{startTime} = $allocationStartTime;
-      $allocations{$allocationId}{weight} = $distance * $allocationEndTime + $accounts{$accountId};
-      $allocations{$allocationId}{balance} = $allocationAmount + $allocationCreditLimit;
-    }
-  
-    # Subtract reservations from allocation balances (including my own)
-    # Lookup reservation amounts against these allocations
-    # SELECT ReservationAllocation.Id,ReservationAllocation.Amount FROM Reservation,ReservationAllocation WHERE Reservation.Id=ReservationAllocation.Reservation AND Reservation.StartTime<=$now AND Reservation.EndTime>$now AND (Account=<Id> ...)
-  
-    my @objects =
-    (
-      new Gold::Object(name => "Reservation"),
-      new Gold::Object(name => "ReservationAllocation"),
-    );
-
-    @selections =
-    (
-      new Gold::Selection(object => "ReservationAllocation", name => "Id"),
-      new Gold::Selection(object => "ReservationAllocation", name => "Amount"),
-    );
-  
-    @conditions =
-    (
-      new Gold::Condition(object => "Reservation", name => "Id", subject => "ReservationAllocation", value => "Reservation"),
-      new Gold::Condition(object => "Reservation", name => "StartTime", value => $now, op => "LE"),
-      new Gold::Condition(object => "Reservation", name => "EndTime", value => $now, op => "GT"),
-    );
-  
-    # Constrain to list of accepted allocation ids
-    $firstTime = 1;
-    $counter = 0;
-    foreach my $id (keys %allocations)
-    {
-      $counter++;
-      my $lastTime = ($counter == scalar keys %allocations) ? 1 : 0;
-  
-      if ($firstTime && $lastTime)
-      {
-        push @conditions, new Gold::Condition(object => "ReservationAllocation", name => "Id", value => $id, conj => "And", group => "0");
-      }
-      elsif ($firstTime)
-      {
-        $firstTime = 0;
-        push @conditions, new Gold::Condition(object => "ReservationAllocation", name => "Id", value => $id, conj => "And", group => "+1");
-      }
-      elsif ($lastTime)
-      {
-        push @conditions, new Gold::Condition(object => "ReservationAllocation", name => "Id", value => $id, conj => "Or", group => "-1");
-      }
-      else
-      {
-        push @conditions, new Gold::Condition(object => "ReservationAllocation", name => "Id", value => $id, conj => "Or", group => "0");
-      }
-    }
-  
-    $results = $database->select(objects => \@objects, selections => \@selections, conditions => \@conditions);
-    foreach my $row (@{$results->{data}})
-    {
-      my $allocationId = $row->[0];
-      my $reservationAmount = $row->[1];
-      
-      if (exists $allocations{$allocationId})
-      {
-        $allocations{$allocationId}{balance} -= $reservationAmount;
-      }
-    }
-  
     # Sort the allocations by weight
     my @allocations = sort { $allocations{$a}{weight} <=> $allocations{$b}{weight} } keys %allocations;
-  
-    # Iterate through the reservationAllocation list
-    foreach my $allocationId (keys %reservationAllocations)
-    {
-      # Break out if we are done
-      last if $remaining <= 0;
-
-      # The amount I subtract from this allocation should be the minimum of:
-      # 1. $remaining (the amount left to withdraw)
-      # 2. $reservationAllocations{$allocationId}{balance}
-      my $accountId = $reservationAllocations{$allocationId}{account};
-      my $debitAmount = min($remaining, $reservationAllocations{$allocationId}{balance});
-      next unless $debitAmount > 0;
-  
-      # Debit the allocation
-      my $subRequest = new Gold::Request(database => $database, object => "Allocation", action => "Modify", actor => $config->get_property("super.user", $SUPER_USER), assignments => [ new Gold::Assignment(name => "Amount", value => $debitAmount, op => "Dec") ], conditions => [ new Gold::Condition(name => "Id", value => $allocationId) ]);
-      my $subResponse = Gold::Base->modify($subRequest, $requestId);
-      if ($subResponse->getStatus() eq "Failure")
-      {
-        return new Gold::Response()->failure($subResponse->getCode(), "Unable to debit allocation: " . $subResponse->getMessage());
-      }
-  
-      # Log the transaction
-      my $delta = 0;
-      if ($reservationAllocations{$allocationId}{startTime} <= $now && $reservationAllocations{$allocationId}{endTime} > $now)
-      {
-        $delta = 0 - $debitAmount;
-      }
-      Gold::Bank->logTransaction(database => $database, requestId => $requestId, txnId => $database->nextId("Transaction"), object => "Job", action => "Charge", actor => $actor, options => [ new Gold::Option(name => "Amount", value => $debitAmount), new Gold::Option(name => "Id", value => $id), new Gold::Option(name => "Child", value => $jobId), new Gold::Option(name => "ItemizedCharges", value => $itemizedCharges) ], assignments => \@assignments, count => 1, account => $accountId, delta => $delta, allocation => $allocationId);
-      $remaining -= $debitAmount;
-      $charges{$accountId} += $debitAmount;
-    }
   
     # Iterate through the allocation list
     foreach my $allocationId (@allocations)
@@ -8010,3 +7982,4 @@ sub logTransaction
 }
 
 1;
+
