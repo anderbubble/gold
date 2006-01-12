@@ -1,4 +1,12 @@
 Gold changes since beta release 2.0.b1.0:
+Release 2.0.0.7
+
+  Fix split charges when a job overruns the time allocation
+  Fix a problem with userid's that start with numbers.
+  Updates for sss-oscar verion of Gold.
+  Changes to some documentation
+  Change the version number accuracy in the automated test
+
 Release 2.0.0.5
 
   Fix the documentation so that it appears that Postgres is
