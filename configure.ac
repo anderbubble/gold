@@ -31,6 +31,7 @@ $PERL -e "require 5.006;" || AC_MSG_ERROR([Perl 5.6 or newer is required])
 AC_SUBST(PERL)
 $PERL -e "require 5.008;" || USE_OPEN="#"
 AC_SUBST(USE_OPEN)
+AC_PATH_PROG(POD2MAN, pod2man, [])
 
 # Check for Java 1.4
 AC_ARG_VAR(JAVA_HOME, [Java 2 SDK home directory (contains bin, lib, jre, ...)])
