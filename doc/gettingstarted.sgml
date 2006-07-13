@@ -50,12 +50,12 @@ glsuser
           </userinput>
         </para>
         <screen>
-Name Active CommonName       PhoneNumber EmailAddress     DefaultProject Description 
------- --------- ------------------------ ---------------- ------------------------ --------------------- ---------------- 
-gold True                                                                             Gold Admin  
-amy  True   Wilkes, Amy                  amy@western.edu                                          
-bob  True   Smith, Robert F.             bob@western.edu                                          
-dave True   Miller, David                dave@western.edu
+Name  Active CommonName       PhoneNumber EmailAddress     DefaultProject Description
+----- ------ ---------------- ----------- ---------------- -------------- -----------
+gold  True                                                                 Gold Admin
+amy   True   Wilkes, Amy                  amy@western.edu                                          
+bob   True   Smith, Robert F.             bob@western.edu                                          
+dave  True   Miller, David                dave@western.edu
         </screen>
       </example>
     </sect1>

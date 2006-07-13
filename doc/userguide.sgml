@@ -26,6 +26,7 @@
 <!ENTITY customize SYSTEM "customize.sgml">
 <!ENTITY integration SYSTEM "integration.sgml">
 <!ENTITY configuration SYSTEM "configuration.sgml">
+<!ENTITY appendix_a SYSTEM "appendix_a.sgml">
 ]>
 
 <book>
@@ -36,8 +37,8 @@
     <date>2005-06-29</date>
     <title><productname>Gold</productname> User's Guide</title>
     <author>
-      <firstname>Scott</firstname>
-      <surname>Jackson</surname>
+      <firstname>HPCANS</firstname>
+      <surname>Gold Team</surname>
       <affiliation><orgname>Pacific Northwest National Laboratory</orgname></affiliation>
     </author>
     <address><email>Scott.Jackson@pnl.gov</email></address>
@@ -83,6 +84,7 @@ This is the general release of the User's Guide. Other information may be found 
   &customize;
   &integration;
   &configuration;
+  &appendix_a;
 
 <!-- End of Book -->
 

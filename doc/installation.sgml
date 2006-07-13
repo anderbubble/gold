@@ -1,16 +1,86 @@
 <chapter id="Installation">
     <title>Installation</title>
     <para>
-Gold uses the standard configure, make and make install steps that we
-all know and love. However, there are a number of preparation,
-prerequisite, setup and customization steps that need to be
-performed. This document provides general installation guidance and
-provides a number of sample steps referenced to a particular
-installation on a Linux platform using the bash shell. These steps
-indicate the userid in brackets performing the step. The exact
-commands to be performed and the user that issues them will vary based
-on the platform, shell, installation preferences, etc. 
+Gold uses the standard configure, make and make install steps.  
+Additionally, there are a number of prerequisite steps that need to be
+completed prior to installation.
     </para>
+
+    <sect1 id="Prerequisites">
+      <title>Install Prerequisites</title>
+      <para>
+You will need the following packages installed in order to build and run GOLD.  In general, it is suggested to use the binary packages supplied with your operating system.  If packages are not available, the desired packages will need to be compiled from source.  For assistance with this, please see Appendix A: Compiling Dependencies From Source.
+      </para>
+
+      <sect2>
+        <title>Perl 5.6.1 or higher (with suidperl) [REQUIRED]</title>
+        <para>
+The gold server and clients are written in Perl. Perl 5.6.1 or higher
+is required. The perl installation must include suidperl for proper
+client authentication. Use 'perl -v' to see what level of Perl is
+installed and 'suidperl -v' to see if suidperl is installed. 
+        </para>
+      </sect2>
+
+      <sect2>
+        <title>libxml2 2.4.25 or higher [REQUIRED]</title>
+        <para>
+LibXML2 is needed by the XML::LibXML perl module to communicate via the SSSRMAP message format.
+        </para>
+      </sect2>
+
+      <sect2>
+        <title>PostgreSQL database 7.2 or higher [RECCOMENDED]</title>
+        <para>
+Robust alternative to SQLLite.
+        </para>
+      </sect2>
+
+      <sect2>
+        <title>Gnu readline 2.0 or higher [OPTIONAL]</title>
+        <para>
+Required for the command-line-editing capabilities of the interactive control program (goldsh)
+        </para>
+      </sect2>
+
+      <sect2>
+        <title>Apache Httpd Server 2.0 or higher [OPTIONAL]</title>
+        <para>
+Required for the GOLD web based gui.
+        </para>
+      </sect2>
+
+      <sect2>
+        <title>OpenSSL 0.9.5a or higher [OPTIONAL]</title>
+        <para>
+Required for the GOLD web based gui.
+        </para>
+      </sect2>
+      <sect2>
+        <title>mod_ssl 2.26 or higher [OPTIONAL]</title>
+        <para>
+Required for the GOLD web based gui.
+        </para>
+      </sect2>
+      <sect2>
+        <title>Python [OPTIONAL]</title>
+        <para>
+Required for the Scalable System Software directory service (ssslib). 
+        </para>
+      </sect2>
+      <sect2>
+        <title>elementtree [OPTIONAL]</title>
+        <para>
+Required for the Scalable System Software directory service (ssslib). 
+        </para>
+      </sect2>
+      <sect2>
+        <title>ssslib [OPTIONAL]</title>
+        <para>
+Provides the Scalable System Software directory service.
+        </para>
+      </sect2>
+    </sect1>
 
     <sect1 id="Preparation">
       <title>Preparation</title>
@@ -18,7 +88,7 @@ on the platform, shell, installation preferences, etc.
 To build and install Gold, you first need to unpack the archive and
 change directory into the top directory of the distribution.  For
 security reasons, it is recommended that you install and run Gold
-under its own non-root userid. 
+under its own non-root userid.
       </para>
       <para>
         <userinput><prompt>[root]# </prompt>
@@ -50,341 +120,6 @@ gzip -cd gold-2.0.0.0.tar.gz | tar xvf -
 cd gold-2.0.0.0
         </userinput>
       </para>
-    </sect1>
-
-    <sect1 id="Prerequisites">
-      <title>Install Prerequisites</title>
-      <para>
-You will first need to build, test and install the following prerequisites:
-      </para>
-
-      <sect2>
-        <title>Perl 5.6.1 or higher (with suidperl) [REQUIRED]</title>
-        <para>
-The gold server and clients are written in Perl. Perl 5.6.1 or higher
-is required. The perl installation must include suidperl for proper
-client authentication. Use 'perl -v' to see what level of Perl is
-installed and 'suidperl -v' to see if suidperl is installed. 
-Perl is available at: &lt;http://www.perl.com/&gt;
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-cd /usr/local/src
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-wget http://www.cpan.org/src/stable.tar.gz
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-gzip -cd stable.tar.gz | tar xvf -
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-cd perl-5.8.5
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-sh Configure -Dd_dosuid -de
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-make
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-make test
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-make install
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-(cd /usr/include &amp;&amp; /usr/local/bin/h2ph *.h sys/*.h)
-          </userinput>
-        </para>
-        <para>
-Or if you are using rpms, you will need the perl and the perl-suidperl
-rpms appropriate for your architecture and operating system: 
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-wget ftp://rpmfind.speakeasy.net/linux/redhat/updates/9/en/os/i386/perl-5.8.0-88.3.i386.rpm
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-wget ftp://rpmfind.speakeasy.net/linux/redhat/updates/9/en/os/i386/perl-suidperl-5.8.0-88.3.i386.rpm
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-rpm -Uvh perl-5.8.0-88.3.i386.rpm perl-suidperl-5.8.0-88.3.i386.rpm
-          </userinput>
-        </para>
-      </sect2>
-
-      <sect2>
-        <title>libxml2 2.4.25 or higher [REQUIRED]</title>
-        <para>
-LibXML2 is needed by the XML::LibXML perl module to communicate via the SSSRMAP message format.
-LibXML2 is available at: &lt;http://www.xmlsoft.org/&gt;
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-cd /usr/local/src
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-wget &mdash;passive-ftp ftp://xmlsoft.org/libxml2-2.6.17.tar.gz
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-gzip -cd libxml2-2.6.17.tar.gz | tar xvf -
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-cd libxml2-2.6.17
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-./configure
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-make
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-make install
-          </userinput>
-        </para>
-      </sect2>
-
-      <sect2>
-        <title>PostgreSQL database 7.2 or higher [OPTIONAL]</title>
-        <para>
-Gold makes use of a database for transactions and data persistence. Two databases have been tested for use with Gold thus far: PostgreSQL and SQLite. Postgres is an external database that must be separately installed configured and started, while SQLite is an embedded database bundled with the Gold source code. If you intend to use the PostgreSQL database, you will need to install it.
-PostgreSQL is available at: &lt;http://www.postgresql.org/&gt;
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-cd /usr/local/src
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-wget ftp://ftp3.us.postgresql.org/pub/postgresql/source/v7.4.5/postgresql-7.4.5.tar.gz
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-gzip -cd postgresql-7.4.5.tar.gz | tar xvf -
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-cd postgresql-7.4.5
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-./configure
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-make
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-make install
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-adduser postgres
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-mkdir /usr/local/pgsql/data
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-chown postgres /usr/local/pgsql/data
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-touch /var/log/pgsql
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-chown postgres /var/log/pgsql
-          </userinput>
-        </para>
-        <para>
-Or if you are using rpms, you will need the postgresql, postgresql-libs, postgresql-server, and postgresql-devel rpms appropriate for your architecture and operating system:
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-wget ftp://rpmfind.speakeasy.net/linux/redhat/updates/9/en/os/i386/postgresql-7.3.2-3.i386.rpm
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-wget ftp://rpmfind.speakeasy.net/linux/redhat/updates/9/en/os/i386/postgresql-libs-7.3.2-3.i386.rpm
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-wget ftp://rpmfind.speakeasy.net/linux/redhat/updates/9/en/os/i386/postgresql-server-7.3.2-3.i386.rpm
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-wget ftp://rpmfind.speakeasy.net/linux/redhat/updates/9/en/os/i386/postgresql-devel-7.3.2-3.i386.rpm
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-rpm -Uvh postgresql-7.3.2-3.i386.rpm postgresql-libs-7.3.2-3.i386.rpm postgresql-server-7.3.2-3.i386.rpm postgresql-devel-7.3.2-3.i386.rpm
-          </userinput>
-        </para>
-      </sect2>
-
-      <sect2>
-        <title>Gnu readline 2.0 or higher [OPTIONAL]</title>
-        <para>
-The interactive control program (goldsh) can support command-line-editing capabilities if readline support is enabled. Most recent linux distributions come with the appropriate readline support.
-Gnu readline is available at: &lt;http://www.gnu.org/&gt;
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-cd /usr/local/src
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-wget http://ftp.gnu.org/gnu/readline/readline-5.0.tar.gz
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-gzip -cd readline-5.0.tar.gz | tar xvf -
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-cd readline-5.0
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-./configure
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-make
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-make install
-          </userinput>
-        </para>
-      </sect2>
-
-      <sect2>
-        <title>Apache Httpd Server 2.0 or higher [OPTIONAL]</title>
-        <para>
-Gold provides a web based gui so that managers, users and administrators can interact with the accounting and allocation system. This alpha gui is still under active development and has not been widely tested, however, it is made available at this stage in the hopes that it may be useful to you as is, and so that we can receive feedback, improvements, etc. The web interface utilizes Perl CGI and SSL and needs an httpd server (preferably apache).
-Apache httpd is available at: &lt;http://httpd.apache.org/&gt;
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-cd /usr/local/src
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-wget http://your.favorite.rpm.mirror/httpd-2.x.xxxxx.rpm
-          </userinput>
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-rpm -Uvh httpd-2.x.xxxxx.rpm
-          </userinput>
-        </para>
-      </sect2>
-
-      <sect2>
-        <title>OpenSSL 0.9.5a or higher [OPTIONAL]</title>
-        <para>
-If you are installing the gui, you will need SSL (preferably OpenSSL).  OpenSSL is a command line toolkit for using secure socket layer encryption on a server.
-OpenSSL is available at: &lt;http://www.openssl.org/&gt;
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-cd /usr/local/src
-          </userinput>
-        </para>
-        <para>
-wget http://your.favorite.rpm.mirror/openssl-0.9.x.xxxx.rpm
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-rpm -Uvh openssl-0.9.x.xxxx.rpm
-          </userinput>
-        </para>
-      </sect2>
-      <sect2>
-        <title>mod_ssl 2.26 or higher [OPTIONAL]</title>
-        <para>
-If you are installing the gui, you will need an apache interface to OpenSSL (preferable mod_ssl).  There are other alternatives to mod_ssl (one of which is apache-ssl from which the mod_ssl code was forked), however, mod_ssl has become the defacto standard and is the most widely adopted.
-mod_ssl is available at: &lt;http://www.modssl.org/&gt;
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-cd /usr/local/src
-          </userinput>
-        </para>
-        <para>
-wget http://your.favorite.rpm.mirror/mod_ssl-2.x.xxxx.rpm
-        </para>
-        <para>
-          <userinput><prompt>[root]# </prompt>
-rpm -Uvh mod_ssl-2.x.xxxx.rpm
-          </userinput>
-        </para>
-      </sect2>
-      <sect2>
-        <title>ssslib [OPTIONAL]</title>
-        <para>
-The ssslib package can be installed if you would like to use the Scalable System Software directory service.
-ssslib is available at: &lt;ftp://ftp.mcs.anl.gov/pub/sss/&gt;
-        </para>
-      </sect2>
     </sect1>
 
     <sect1 id="Configure">
@@ -549,6 +284,10 @@ The standard installation process will copy the binaries and perl scripts to /us
 To delete the files created by the Gold installation, you can use 'make uninstall'.
       </para>
       <para>
+        <userinput><prompt>[root]# </prompt>
+make uninstall         </userinput>
+      </para>
+      <para>
 You will also need to generate a secret key which enables secure communication
 between clients and server. This key is a pass-phrase consisting of up to 80
 characters and can include spaces and the regular visible ASCII characters.
@@ -599,7 +338,7 @@ Initialize the database (if you installed from tarball).
       </para>
       <para>
         <userinput><prompt>[postgres]$ </prompt>
-/usr/local/pgsql/bin/initdb -D /usr/local/pgsql/data
+initdb -D /usr/local/pgsql/data
         </userinput>
       </para>
       <para>
@@ -615,7 +354,7 @@ Startup postgres with the -i option to allow internet domain sockets
       </para>
       <para>
         <userinput><prompt>[postgres]$ </prompt>
-/usr/local/pgsql/bin/postmaster -i -D /usr/local/pgsql/data >/var/log/pgsql 2>&amp;1 &amp;
+postmaster -i -D /usr/local/pgsql/data >/var/log/pgsql 2>&amp;1 &amp;
         </userinput>
       </para>
       <para>
@@ -623,21 +362,25 @@ Add the "gold" user as a database administrator
       </para>
       <para>
         <userinput><prompt>[postgres]$ </prompt>
-/usr/local/pgsql/bin/createuser gold
+createuser gold
         </userinput>
       </para>
       <screen>
 Shall the new user be allowed to create databases? y
 Shall the new user be allowed to create more new users? n
+CREATE USER
       </screen>
       <para>
 Create the gold database
       </para>
       <para>
         <userinput><prompt>[gold]$ </prompt>
-/usr/local/pgsql/bin/createdb gold
+createdb gold
         </userinput>
       </para>
+      <screen>
+CREATE DATABASE
+      </screen>
       <para>
 You may need to edit the goldd.conf or gold.conf files to reflect the configuration of your database.
       </para>
@@ -650,6 +393,9 @@ vi /usr/local/gold/etc/goldd.conf
         <userinput><prompt>[gold]$ </prompt>
 vi /usr/local/gold/etc/gold.conf
         </userinput>
+      </para>
+      <para>
+Test that the database was correctly created.
       </para>
     </sect1>
 
@@ -732,7 +478,7 @@ The following shows an example configuration that involves making some modificat
       </para>
       <para>
         <userinput><prompt>[gold]$ </prompt>
-	  /usr/local/pgsql/bin/psql gold &lt; bank.sql
+	  psql gold &lt; bank.sql
         </userinput>
       </para>
       <para>

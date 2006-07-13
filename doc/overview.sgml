@@ -7,6 +7,13 @@ Gold is an open source accounting system that tracks and manages resource usage 
 Since accounting needs vary widely from organization to organization, Gold has been designed to be extremely flexible, featuring customizable accounting and supporting a variety of accounting models. Attention has been given to scalability, security, and fault tolerance. Gold facilitates the sharing of resources between organizations or within a Grid by providing distributed accounting while preserving local site autonomy.
     </para>
 
+    <sect1 id="UsingThisGuide">
+     <title>Using This Guide</title>
+      <para>
+This document provides general guidance by providing a number of example steps.  These example steps were created using the bash shell on a Linux system and indicate the user performing them via their username in brackets.  The exact commands to be performed and the user who issues them will vary based on the platform, shell and installation preference.
+      </para>
+    </sect1>
+
     <sect1 id="Background">
       <title>Background</title>
 
