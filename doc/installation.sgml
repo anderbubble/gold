@@ -464,7 +464,7 @@ The following shows an example configuration that involves making some modificat
 	</userinput>
       </para>
       <para>
-	To access the web gui, open a browser with url: https://your.server/gold.cgi
+	To access the web gui, open a browser with url: https://your.server/cgi-bin/gold.cgi
       </para>
     </sect1>
     <sect1 id="Bootstrap">
