@@ -119,8 +119,16 @@ use Gold::Reply;
 use Gold::Client;
 
 BEGIN {
-  my $configFile = "${PREFIX}/etc/goldg.conf";
-  open CONFIG, "$configFile" or die("Unable to open config file ($configFile): $!.\nYou may need to set the \$GOLD_HOME environment variable.\n");
+  my $configFile = "${PREFIX}/etc/goldg.conf"; 
+  my $configFileExists = 0;
+
+  if ( open CONFIG, "$configFile" ) {
+	$configFileExists = 1;
+  } else {
+	$configFileExists = 0;
+	$configFile = "/dev/null";
+        open CONFIG, "$configFile" or die("Unable to open config file $configFile (or fake config file /dev/null): $!.\nYou may need to set the \$GOLD_HOME environment variable or create a new config file.\nA command to do this would be 'echo > $configFile' (as root with no quotes).\n");
+  }
 
   # Read the Config File
   $config = new Data::Properties();
@@ -132,6 +140,9 @@ BEGIN {
   Log::Log4perl->init("$configFile");
   $log = get_logger("Gold");
   $log->info("$0 (PID $$) Started *******************************************");
+  if ( $configFileExists == 0 ) {
+	$log->info("$0: could not load config file $configFile.  Using defaults.");
+  }
 }
 
 1;
