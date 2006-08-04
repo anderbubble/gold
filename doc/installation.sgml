@@ -395,10 +395,19 @@ vi /usr/local/gold/etc/gold.conf
         </userinput>
       </para>
       <para>
-Test that the database was correctly created.
+You may need to configure postgres to allow tcp connections if you want to use the GUI or connect to the database from a remote machine.  Under RedHat Enterprise Linux 4, this may be done with the following commands:
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+echo PGOPTS=\"-i\" > /etc/sysconfig/pgsql/postgresql
+        </userinput>
+      </para>
+      <para>
+        <userinput><prompt>[root]# </prompt>
+service postgresql restart
+        </userinput>
       </para>
     </sect1>
-
     <sect1 id="WebServerSetup">
       <title>Web Server Setup</title>
       <para>

@@ -1,5 +1,6 @@
 <!--
       This is the Gold User's Guide by Scott Jackson.
+      Maintained by the PNNL GOLD development team.
       See userguide.txt or userguide.pdf for formatted output.
 -->
 
@@ -37,7 +38,7 @@
     <date>2005-06-29</date>
     <title><productname>Gold</productname> User's Guide</title>
     <author>
-      <firstname>HPCANS</firstname>
+      <firstname>PNNL</firstname>
       <surname>Gold Team</surname>
       <affiliation><orgname>Pacific Northwest National Laboratory</orgname></affiliation>
     </author>
