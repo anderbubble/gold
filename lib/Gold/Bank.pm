@@ -1832,8 +1832,8 @@ sub charge
         $allocations{$allocationId}{account} = $accountId;
         $allocations{$allocationId}{endTime} = $allocationEndTime;
         $allocations{$allocationId}{startTime} = $allocationStartTime;
-        $allocations{$allocationId}{weight} ||= $distance * $allocationEndTime + $accounts{$accountId};
-        $allocations{$allocationId}{balance} += $allocationAmount + $allocationCreditLimit;
+        $allocations{$allocationId}{weight} = $distance * $allocationEndTime + $accounts{$accountId};
+        $allocations{$allocationId}{balance} = $allocationAmount + $allocationCreditLimit;
       }
     
       # Subtract reservations from allocation balances (including my own)
